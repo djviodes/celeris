@@ -25,3 +25,11 @@ topic, in no particular order or urgency.
   whole project, so understanding its internal array representation (strides, dtype handling, how
   it manages memory for arbitrarily-shaped arrays) is useful background for comparison, even
   though it wasn't required to make the sizing call.
+
+## From: correctness testing & floating-point tolerance decision (2026-08-22)
+
+- **Catastrophic cancellation, in depth.** Came up while working out why relative-tolerance
+  comparisons struggle near zero (subtracting two near-equal-magnitude floats cancels most
+  leading digits, leaving a result dominated by prior rounding error). The combined
+  absolute+relative tolerance decision was made without needing the full mechanics here — worth
+  reading up on properly for its own sake, not just as a footnote to the tolerance decision.
