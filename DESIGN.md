@@ -61,6 +61,28 @@ CPU/GPU crossover point.
 Python/NumPy reference implementations used only for benchmark comparison — not a dependency
 of the Rust core itself.
 
+## Correctness verification
+
+Beyond the performance benchmarks described above, naive Rust, SIMD Rust, and NumPy results are
+checked against each other for correctness, not just speed:
+
+- **Golden-value tests:** a set of hand-calculated example inputs/outputs, checked against all
+  three implementations. Catches a bug shared across all three (e.g. a misunderstood operation)
+  that comparing implementations against each other alone wouldn't reveal.
+- **Oracle/differential testing:** a larger set of randomly generated inputs, checked for
+  agreement across naive, SIMD, and NumPy, using `proptest` for input generation and shrinking.
+  Catches an implementation that diverges from the other two.
+- **Floating-point comparison:** results are compared using combined absolute + relative
+  tolerance rather than exact equality. SIMD execution (fused multiply-add, parallel-lane
+  accumulation order) can produce results that differ from naive scalar execution in the last few
+  bits even when both are correct, since floating-point arithmetic isn't strictly associative.
+  Pure relative tolerance (and ULP-based comparison) degrade near zero; the combined approach
+  avoids that failure mode.
+
+Still open: the exact mechanism for getting NumPy's output into the Rust test suite (e.g.
+pre-generated fixture files vs. invoking Python as a subprocess) — to be decided at
+implementation time.
+
 ## Design decisions
 
 - **`std::arch` over `std::simd`:** `std::simd` (Rust's portable SIMD API) is nightly-only.
