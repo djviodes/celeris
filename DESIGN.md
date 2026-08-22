@@ -72,9 +72,18 @@ of the Rust core itself.
 - **`f64` only for MVP:** `f64` is the more common default in general-purpose/scientific
   numerical computing (matches NumPy's own default dtype), and precision matters more than
   raw throughput for this project's framing. `f32` is deferred to post-MVP.
+- **Fixed-size, stack-allocated vectors/matrices (const generics):** Vector and matrix sizes are
+  fixed at compile time via Rust's const generics, backed by stack-allocated arrays rather than
+  heap-allocated `Vec`. This avoids per-operation heap allocation/deallocation overhead and the
+  pointer indirection of heap-backed storage. Trade-off: no support for runtime-determined
+  (dynamically-sized) vectors or matrices. Stack space is finite and imposes a practical ceiling
+  on supported sizes; the exact safe bound (accounting for multiple live operands per operation,
+  not just a single buffer in isolation) is not yet determined.
 
 ## Non-goals (for MVP)
 
+- Dynamically-sized (runtime-determined) vectors/matrices — sizes are fixed at compile time via
+  const generics
 - `f32` support (post-MVP)
 - GPU execution or CPU/GPU dispatch (post-MVP)
 - Multi-threading beyond SIMD (post-MVP)
