@@ -79,9 +79,31 @@ checked against each other for correctness, not just speed:
   Pure relative tolerance (and ULP-based comparison) degrade near zero; the combined approach
   avoids that failure mode.
 
-Still open: the exact mechanism for getting NumPy's output into the Rust test suite (e.g.
-pre-generated fixture files vs. invoking Python as a subprocess) — to be decided at
-implementation time.
+NumPy is invoked from the Rust test suite as a subprocess (`std::process::Command`), passing
+inputs as arguments and reading the result back from the script's output, rather than embedding
+Python via PyO3. This keeps Python entirely out of the Rust core's build (consistent with Python/
+NumPy being a benchmark-comparison-only dependency, not a runtime dependency of the core, per
+README) — subprocess-spawn cost is irrelevant here since this only runs during `cargo test`, not
+inside anything benchmarked.
+
+## SIMD remainder handling and memory alignment
+
+AVX2 processes 4 `f64` per register, and vector/matrix sizes (fixed via const generics) won't
+always be a multiple of 4. Storage is padded up to the next multiple of 4 by default, so
+operations always work on full registers with no separate scalar tail loop. The padding value at
+rest is chosen to be a safe identity element for addition/multiplication-based operations (e.g.
+`0`, which doesn't affect a sum, dot product, or scale).
+
+Not every operation is safe with that resting padding value — the test is whether the padding
+value matches the operation's own mathematical identity element. Where it doesn't (e.g. `min`,
+whose identity element is `+infinity`, not `0`), masked SIMD operations are used instead of
+relying on the default padding. This is decided per-operation, not as a single universal rule.
+
+Storage uses `#[repr(align(32))]` to guarantee 32-byte alignment, matching AVX2's 256-bit
+register width, so aligned load/store instructions (`_mm256_load_pd`/`_mm256_store_pd`) are used
+rather than their unaligned counterparts. Combined with the padding above (storage always sized
+to a multiple of 32 bytes), every SIMD register-width chunk in the array stays 32-byte aligned,
+not just the first one.
 
 ## Design decisions
 
