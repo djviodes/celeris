@@ -123,6 +123,12 @@ not just the first one.
   (dynamically-sized) vectors or matrices. Stack space is finite and imposes a practical ceiling
   on supported sizes; the exact safe bound (accounting for multiple live operands per operation,
   not just a single buffer in isolation) is not yet determined.
+- **AVX2 hardcoded at compile time for MVP, no runtime detection:** MVP targets known hardware
+  (the author's own machine, confirmed AVX2-capable), so CPU feature detection and multi-
+  instruction-set dispatch would add complexity with no benefit yet. AVX2 is isolated behind the
+  `simd` module's safe interface (see Components), so runtime detection and dispatch across
+  multiple instruction sets can be added later without restructuring the vector/matrix modules
+  that call into it. Deferred to post-MVP — see roadmap.
 
 ## Non-goals (for MVP)
 
@@ -137,6 +143,20 @@ not just the first one.
 
 ## Post-MVP roadmap
 
+- **Runtime CPU feature detection with per-instruction-set dispatch** (AVX2, AVX-512, etc.),
+  replacing MVP's hardcoded AVX2 assumption, so the crate can run correctly (with graceful
+  degradation or best-available instruction set) on hardware other than the author's own —
+  relevant if this ever moves beyond a personal learning project toward wider distribution.
+  The MVP decision to hardcode AVX2 was made on intuition, not research — research still needed
+  before implementing this item:
+  - `is_x86_feature_detected!` — how it works, when the check happens, and its cost.
+  - `#[cfg(target_feature = "avx2")]` and the `-C target-feature`/`-C target-cpu` rustc flags.
+  - What happens if a compile-time-assumed feature turns out to be wrong at runtime.
+  - `#[target_feature(enable = "avx2")]` — what it does, and why functions calling AVX2
+    intrinsics need to be marked with it.
+  - How `#[target_feature]` relates to `unsafe`.
+  - How existing Rust SIMD-oriented crates handle runtime dispatch between multiple
+    implementations.
 - **Heuristic/adaptive CPU-GPU dispatch:** benchmark a GPU implementation against the SIMD CPU
   core to empirically find the input-size crossover point where GPU execution wins despite data
   transfer overhead, then route operations to whichever backend is faster based on that data.

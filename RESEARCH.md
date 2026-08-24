@@ -33,3 +33,11 @@ topic, in no particular order or urgency.
   leading digits, leaving a result dominated by prior rounding error). The combined
   absolute+relative tolerance decision was made without needing the full mechanics here — worth
   reading up on properly for its own sake, not just as a footnote to the tolerance decision.
+
+## From: CPU feature detection decision (2026-08-22)
+
+- **The real instruction-set hierarchy for `f64` SIMD work.** AVX (without the 2) already added
+  256-bit floating-point vector instructions; AVX2 mainly extended 256-bit width to integer
+  operations. So "AVX vs. AVX2 vs. AVX-512" isn't three evenly-spaced steps for this project's
+  purely-`f64` workload the way the naming implies — worth understanding the actual differences
+  precisely before building the post-MVP multi-instruction-set dispatch.
