@@ -105,6 +105,28 @@ rather than their unaligned counterparts. Combined with the padding above (stora
 to a multiple of 32 bytes), every SIMD register-width chunk in the array stays 32-byte aligned,
 not just the first one.
 
+## Error handling
+
+Because vector/matrix sizes are fixed at compile time via const generics, most "mismatched
+dimensions" scenarios (e.g. adding a `Vector<3>` to a `Vector<4>`, or multiplying incompatible
+matrix shapes) are type errors caught by the compiler — there's no runtime handling needed for
+them at all.
+
+Two genuinely runtime-fallible cases remain, handled differently depending on whether the
+failure is a programmer logic error or genuinely external/untrusted data:
+
+- **Indexing with a runtime-computed index:** returns `Option<&T>` (matching `slice::get`'s
+  convention in Rust's standard library). Since a `Vector<N>`'s length is a compile-time
+  constant, an out-of-range index almost always reflects a bug in the calling code, not
+  untrusted external input — there's only one possible failure reason, so no additional error
+  context is needed.
+- **Constructing a fixed-size vector/matrix from runtime-length external data** (e.g. NumPy
+  subprocess output, `proptest`-generated inputs, eventually real user input): returns `Result`,
+  via a `TryFrom` implementation, carrying a descriptive error (e.g. expected vs. actual length).
+  This data genuinely originates outside the program's control, so the caller needs context to
+  understand and handle the failure, per Rust API Guidelines: don't panic on invalid external
+  input, return `Result` instead.
+
 ## Design decisions
 
 - **`std::arch` over `std::simd`:** `std::simd` (Rust's portable SIMD API) is nightly-only.
