@@ -129,6 +129,20 @@ failure is a programmer logic error or genuinely external/untrusted data:
 
 ## Design decisions
 
+- **Column-major matrix storage:** Neither row-major nor column-major is inherently faster —
+  cache-friendliness depends on whether traversal order matches the storage layout, and this cuts
+  both ways symmetrically (row-major favors row-wise access, column-major favors column-wise
+  access). Matrix multiplication inherently requires walking one operand row-wise and the other
+  column-wise regardless of which single layout is chosen for both, so this decision doesn't
+  resolve that on its own — it requires separate techniques (transposing an operand, cache
+  blocking) applied independently of the storage layout. Column-major matches how the author
+  naturally reasons about linear algebra (columns as the primary unit — e.g. matrix-vector
+  multiplication as a linear combination of columns) and matches the historical convention used
+  by Fortran/BLAS/LAPACK, the foundation underneath much of scientific computing software. Note:
+  NumPy's own default array layout is row-major ("C order"), even though it delegates much of its
+  heavier linear algebra internally to column-major BLAS/LAPACK — this is a storage-convention
+  difference from the benchmark comparison target only, not a correctness concern.
+
 - **`std::arch` over `std::simd`:** `std::simd` (Rust's portable SIMD API) is nightly-only.
   Targeting stable Rust means using `std::arch` intrinsics directly, which are more verbose
   and platform-specific, but require no special toolchain setup for anyone building the project.
@@ -165,6 +179,15 @@ failure is a programmer logic error or genuinely external/untrusted data:
 
 ## Post-MVP roadmap
 
+- **Dual-layout matrix storage (row-major + column-major) with cached conversions:** maintain
+  both layouts for matrices where different operations benefit from different access patterns,
+  using Mnemosyne (a separate caching library project, Rust rewrite also post-MVP) to cache
+  converted copies rather than re-converting repeatedly. Depends
+  on: the matrix mutability model (immutable values sidestep cache invalidation entirely; in-place
+  mutation would need an invalidation mechanism), the memory cost of maintaining two
+  representations (relevant given the still-unresolved stack-size ceiling from the sizing
+  decision), and empirical per-operation benchmark data (see Benchmark methodology, not yet
+  decided) to know which operations actually benefit from which layout.
 - **Runtime CPU feature detection with per-instruction-set dispatch** (AVX2, AVX-512, etc.),
   replacing MVP's hardcoded AVX2 assumption, so the crate can run correctly (with graceful
   degradation or best-available instruction set) on hardware other than the author's own —
