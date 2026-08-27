@@ -208,12 +208,23 @@ Components: analysis) does whatever conversion is needed at comparison time:
   rather than trusting each tool's own summary computation, and a unified metadata schema. This
   extends/replaces the existing "CLI or visualization tool" roadmap item (see roadmap).
 
-Still being researched, not yet decided:
-- Matching `criterion`'s statistical rigor (warm-up, outlier handling) against `pyperf`'s on the
-  Python/NumPy side — comparing what stats each tool actually reports, to see how close a fit
-  is achievable (feeds into the post-MVP matched-statistics work above).
-- The actual sweep size range — depends on two still-open items from Topic 1: realistic
-  vector/matrix sizes in scientific computing, and the real safe stack-size ceiling.
+**Sweep size ceiling.** Confirmed `criterion` benchmarks run on the main thread (not a spawned
+thread), so the applicable stack budget is the OS-level main-thread limit — confirmed via
+`ulimit -s` at 8192 KiB (8 MiB) on the author's machine — rather than Rust's smaller 2 MiB
+spawned-thread default. Accounting for 3 simultaneous live buffers per operation (e.g. matrix
+multiply's two inputs plus one output — the same conservative count applied to both vectors and
+matrices below):
+- **Matrix sweep ceiling: N=500** (500×500). `500² × 8 bytes × 3 buffers ≈ 5.72 MiB`, leaving
+  ~2.28 MiB headroom out of 8 MiB for call-frame overhead, `criterion`'s own internal state, etc.
+- **Vector sweep ceiling: N=250,000.** Chosen to exactly match the matrix ceiling's total element
+  count (500² = 250,000), since a matrix's elements scale as N² while a vector's scale as N —
+  this gives vectors the identical byte usage and headroom as the matrix case, rather than
+  needlessly capping vectors at 500 when the same budget supports far more.
+
+This was a provisional, calculation-based ceiling, not empirically verified — deliberately
+reducing the stack limit and testing for an actual overflow (e.g. via `ulimit -s` or
+`std::thread::Builder::stack_size`) would give a measured rather than calculated number; worth
+revisiting once real operation code exists.
 
 ## Design decisions
 
