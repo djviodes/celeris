@@ -135,6 +135,40 @@ failure is a programmer logic error or genuinely external/untrusted data:
   understand and handle the failure, per Rust API Guidelines: don't panic on invalid external
   input, return `Result` instead.
 
+## Benchmark methodology
+
+NumPy is benchmarked as a standalone Python process using Python's own timing tools, not spawned
+per-timed-call from Rust (unlike the subprocess mechanism used for correctness checks — see
+Correctness verification). Spawning a fresh process per timed call would bake process-spawn
+overhead into NumPy's measured performance, invalidating the comparison. Results are written out
+as JSON and combined with Rust's `criterion` results into one unified sweep report.
+
+Layout is treated as an accepted, uncontrolled difference between Celeris (column-major) and
+NumPy (row-major) rather than something to normalize away — no layout conversion happens for the
+benchmark comparison, and no row-major variant of Celeris is built solely to isolate the
+variable. This matches the project's actual goal (proving SIMD is competitive with an
+established library end-to-end, per Purpose), not an isolated experiment on memory layout itself.
+
+Identical input data across naive Rust, SIMD Rust, and NumPy at each sweep size: `criterion`'s
+`bench_with_input` generates each size's input once, outside the timed closure, so naive and
+SIMD share identical data within the Rust benchmark. That same generated data is then written
+out via the `npyz` crate in NumPy's native `.npy` binary format, which the standalone Python
+benchmark script reads directly via `numpy.load()` — avoiding a custom parsing step on the
+Python side. `npyz` was chosen over `ndarray-npy` specifically because Celeris doesn't use the
+`ndarray` crate anywhere (see Design decisions: fixed-size, stack-allocated vectors/matrices) —
+`ndarray-npy` would require adding `ndarray` as a new dependency solely for this export step,
+while `npyz` works directly from a raw `Vec<f64>`/slice, which is what Celeris's own storage
+would need to be converted to for export regardless of which library was used.
+
+Still being researched, not yet decided:
+- Matching `criterion`'s statistical rigor (warm-up, outlier handling) on the Python/NumPy side.
+- Exact JSON schema, and how `criterion`'s own output format gets combined with the Python-side
+  JSON.
+- What to record about the benchmarking hardware/environment (CPU model, confirmed AVX2/FMA
+  status, etc.) alongside results.
+- The actual sweep size range — depends on two still-open items from Topic 1: realistic
+  vector/matrix sizes in scientific computing, and the real safe stack-size ceiling.
+
 ## Design decisions
 
 - **Column-major matrix storage:** Neither row-major nor column-major is inherently faster —
@@ -245,6 +279,10 @@ failure is a programmer logic error or genuinely external/untrusted data:
 - **Multi-threading (Rayon)** layered on top of SIMD, parallelizing across cores in addition to
   within them.
 - **CLI or visualization tool** to chart benchmark sweep data rather than only printing numbers.
+- **Continuous benchmarking / CI regression tracking via Bencher**, layered on top of `criterion`
+  (which remains the actual measurement engine) to track performance across commits/PRs over
+  time and catch regressions in CI — distinct from the single-run visualization tool above.
+  Bencher has both self-hosted and hosted-SaaS options; which to use isn't decided.
 - **Sparse matrix support** — a distinct linear algebra topic using different algorithms than
   the dense operations built for MVP.
 - **Higher-level LA operations** (solving linear systems, eigenvalues, general N×N determinant
