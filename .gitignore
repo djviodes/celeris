@@ -1,0 +1,20 @@
+# Rust / Cargo
+/target
+
+# Python (scripts/, pyperf benchmarking script)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+
+# Personal reference, not project documentation (see SAFETY.md itself for why)
+SAFETY.md

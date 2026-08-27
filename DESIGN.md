@@ -316,8 +316,25 @@ revisiting once real operation code exists.
 - **Crate names:** `celeris` for the numerical core, `celeris-analysis` for the analysis/
   benchmarking tool crate — hyphenated-suffix naming, a common convention for auxiliary crates
   in a Rust workspace.
-- Still open (researching): clippy/rustfmt configuration baseline, and the `unsafe`
-  safety-comment convention for the `simd` module.
+- **Rustfmt:** no custom `rustfmt.toml` — `rustfmt`'s defaults are already designed to match the
+  official Rust style guide, so there's nothing to configure.
+- **Clippy:** the standard default lint groups (`correctness`/`style`/`complexity`/`perf`/
+  `suspicious`) plus `clippy::pedantic` enabled, with all of it promoted from warnings to hard
+  errors (`-D warnings`, enforced in CI and locally) rather than left as non-blocking suggestions.
+  Deliberately stricter and noisier than a typical default setup — chosen specifically because
+  rigorous enforcement serves this project's idiomatic-Rust learning goal better than lints that
+  are easy to ignore, and matches CLAUDE.md's stated production-quality-practices goal.
+- **`unsafe` safety-comment convention:** two complementary conventions for the `simd` module —
+  block-level `// SAFETY: ...` comments on individual `unsafe { ... }` blocks (justifying why
+  *this* usage is sound), and function-level `/// # Safety` doc comments on any `unsafe fn` that
+  takes raw pointers/slices directly rather than the safe `Vector<N>`/`Matrix<M,N>` types (`clippy`'s
+  `missing_safety_doc` and `undocumented_unsafe_blocks` lints — already enforced via the
+  clippy/pedantic/deny setup above — require both). The substantive rule: every safety comment
+  must cite a specific, already-decided Celeris guarantee (32-byte alignment via
+  `#[repr(align(32))]`, padding to a multiple of 4 elements, or mask correctness for min/max-style
+  operations) rather than restate generic SIMD safety principles — a comment that doesn't
+  reference one of those isn't adding real information. A personal reference file with worked
+  examples exists locally (not tracked in git, per `.gitignore`).
 
 ## Non-goals (for MVP)
 
