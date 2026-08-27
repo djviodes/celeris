@@ -9,7 +9,9 @@ approach, but that it's competitive with an established, widely-used numerical l
 
 This project exists primarily as a hands-on learning vehicle for hardware-level performance
 work (SIMD, CPU architecture, benchmarking methodology) grounded in linear algebra fundamentals,
-ahead of longer-term goals in scientific computing / HPC.
+ahead of longer-term goals in scientific computing / HPC — including eventual use as the
+numerical core for a separate physics simulation platform, which shapes some operation-scope
+decisions below (e.g. cross product).
 
 ## Architecture
 
@@ -36,13 +38,19 @@ each other:
 
 ### vector
 
-Core vector operations: addition, scaling, dot product, and other standard vector arithmetic.
+Core vector operations: addition, subtraction, scaling, dot product, outer product (produces a
+matrix), Euclidean (L2) and Manhattan (L1) norms (defined for any size `N`), and other standard
+vector arithmetic — exact remaining scope still being finalized (see Design decisions). Cross
+product is a planned early post-MVP addition, not MVP (see Design decisions and roadmap).
 Implemented three times per the architecture above (naive, SIMD, and the NumPy reference script).
 
 ### matrix
 
-Core matrix operations: multiplication, transpose, and other standard matrix arithmetic.
-Same three-way implementation pattern as vector operations.
+Core matrix operations: addition, subtraction, scaling, matrix-matrix multiplication,
+matrix-vector multiplication, transpose, determinant (1×1, 2×2, and 3×3 only for MVP — see
+Design decisions), Frobenius norm, matrix 1-norm (max absolute column sum), and matrix ∞-norm
+(max absolute row sum) — all defined for any size — and other standard matrix arithmetic — exact
+remaining scope still being finalized. Same three-way implementation pattern as vector operations.
 
 ### simd
 
@@ -166,6 +174,31 @@ failure is a programmer logic error or genuinely external/untrusted data:
   multiple instruction sets can be added later without restructuring the vector/matrix modules
   that call into it. Deferred to post-MVP — see roadmap.
 
+- **Determinant limited to 1×1, 2×2, and 3×3 for MVP:** direct, decomposition-free closed-form
+  formulas exist only at these sizes (2×2: `ad - bc`; 3×3: cofactor expansion/rule of Sarrus).
+  Beyond 3×3, cofactor expansion scales factorially (~N! terms) and becomes computationally
+  intractable — general N×N determinant requires a decomposition-based algorithm (e.g. LU),
+  which is already out of MVP scope (see Non-goals). Because the formula itself differs per exact
+  size, this is implemented per-specific-N rather than as one generic function over
+  `Matrix<N, N>`, the same shape of constraint as cross product being 3D-only. General N×N
+  determinant is deferred to post-MVP (see roadmap).
+
+- **Min column/row sum excluded from norms:** NumPy exposes these via `linalg.norm`'s `ord=-1`
+  (min column sum) and `ord=-inf` (min row sum), but they don't satisfy the triangle inequality
+  (counterexample: two matrices each with min column sum 2 can sum to a matrix with min column
+  sum 22), so they aren't mathematically norms despite NumPy's naming convenience. Excluded from
+  Celeris's norm operations for MVP; deferred to post-MVP as a separately-named utility, not
+  documented as a norm (see roadmap).
+
+- **Cross product deferred to (early) post-MVP:** mathematically relevant to Celeris's longer-term
+  goal of powering a physics simulation platform, so it will be added — but it structurally
+  doesn't fit MVP's barebones scope the way the rest of the operation list does: it only exists
+  for 3D vectors (breaking the generic-`N` pattern every other MVP operation follows), can't
+  participate in the size-sweep benchmarking MVP is built around, and is too small an operation
+  (3 elements) for SIMD to show a meaningful speedup on. Prioritized as an early post-MVP
+  addition given its importance to that future consumer, rather than lumped in with the rest of
+  the post-MVP backlog.
+
 ## Non-goals (for MVP)
 
 - Dynamically-sized (runtime-determined) vectors/matrices — sizes are fixed at compile time via
@@ -179,6 +212,9 @@ failure is a programmer logic error or genuinely external/untrusted data:
 
 ## Post-MVP roadmap
 
+- **Cross product (3D vectors only)** — early-priority post-MVP addition, ahead of the rest of
+  this list, needed for the planned physics simulation platform; deferred from MVP due to its
+  fixed-size, non-generic nature (see Design decisions).
 - **Dual-layout matrix storage (row-major + column-major) with cached conversions:** maintain
   both layouts for matrices where different operations benefit from different access patterns,
   using Mnemosyne (a separate caching library project, Rust rewrite also post-MVP) to cache
@@ -211,7 +247,10 @@ failure is a programmer logic error or genuinely external/untrusted data:
 - **CLI or visualization tool** to chart benchmark sweep data rather than only printing numbers.
 - **Sparse matrix support** — a distinct linear algebra topic using different algorithms than
   the dense operations built for MVP.
-- **Higher-level LA operations** (solving linear systems, eigenvalues) built on top of the
-  vector/matrix primitives.
+- **Higher-level LA operations** (solving linear systems, eigenvalues, general N×N determinant
+  beyond MVP's 3×3 cap) built on top of the vector/matrix primitives.
+- **Min column/row sum utility functions** (matching NumPy's `linalg.norm(ord=-1)`/`ord=-inf`) —
+  not true norms (fail the triangle inequality), so named and placed separately from Celeris's
+  actual norm operations rather than alongside them; exact API placement not yet decided.
 - **Python bindings via PyO3**, allowing the Rust core to be called from Python — a direct
   parallel to how NumPy itself works under the hood (a compiled, fast core exposed to Python).
