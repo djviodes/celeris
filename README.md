@@ -14,18 +14,18 @@ Early development. Core vector and matrix operations are being built incremental
 
 ## Project Structure
 
-Celeris is a Cargo workspace with (at least) two crates — the numerical core library, and a
-separate analysis/benchmarking tool crate (kept separate so the core library's dependencies stay
-lean for downstream consumers — see DESIGN.md). Exact crate names not yet decided.
+Celeris is a Cargo workspace with two crates — `celeris` (the numerical core library) and
+`celeris-analysis` (kept separate so the core library's dependencies stay lean for downstream
+consumers — see DESIGN.md).
 
 ```
-/<core crate>
+/celeris
   /src
     /vector    — vector operations (add, scale, dot product, etc.)
     /matrix    — matrix operations (multiply, transpose, etc.)
     /simd      — AVX2 intrinsics via std::arch, wrapped for internal use
   /benches     — criterion benchmarks (naive Rust vs. SIMD Rust vs. NumPy)
-/<analysis crate> — combines criterion + pyperf output into one comparison report (Rust)
+/celeris-analysis — combines criterion + pyperf output into one comparison report (Rust)
 /scripts          — NumPy reference implementations + pyperf benchmarking script (Python)
 ```
 
@@ -40,4 +40,10 @@ Setup instructions to be added as the project takes shape.
 
 ## License
 
-TBD
+Dual-licensed under either of:
+
+- MIT license ([LICENSE-MIT](LICENSE-MIT))
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE))
+
+at your option — the standard convention for Rust crates (Rust itself is dual-licensed the
+same way), giving downstream users the flexibility to pick whichever license fits their project.

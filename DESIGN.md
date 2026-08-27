@@ -36,9 +36,9 @@ each other:
 
 ## Components
 
-Celeris is organized as a Cargo workspace with (at least) two crates: the numerical core library
-(vector/matrix/simd, below) and a separate analysis/benchmarking tool crate — see Design
-decisions for why this is split rather than one crate. Exact crate names not yet decided.
+Celeris is organized as a Cargo workspace with two crates: `celeris` (the numerical core library,
+vector/matrix/simd, below) and `celeris-analysis` (the analysis/benchmarking tool crate) — see
+Design decisions and Project mechanics for why it's split and how the crates are named.
 
 ### vector
 
@@ -74,7 +74,7 @@ Python/NumPy reference implementations used only for benchmark comparison — no
 of the Rust core itself. Also home to the `pyperf`-based NumPy benchmarking script (see
 Benchmark methodology), run as its own standalone Python process.
 
-### analysis (separate crate, in Rust)
+### celeris-analysis (separate crate, in Rust)
 
 Combines `criterion`'s Rust-side benchmark output with the Python-side `pyperf` output into one
 comparison report. See Benchmark methodology for the MVP vs. post-MVP shape of this tool, and
@@ -302,6 +302,22 @@ revisiting once real operation code exists.
   (3 elements) for SIMD to show a meaningful speedup on. Prioritized as an early post-MVP
   addition given its importance to that future consumer, rather than lumped in with the rest of
   the post-MVP backlog.
+
+## Project mechanics
+
+- **MSRV:** pinned to whatever the latest stable Rust release is at the time of pinning, updated
+  only deliberately (e.g. security fixes, a needed new feature) rather than left to float
+  automatically with each new stable release — keeps builds reproducible for future consumers
+  (e.g. CI, the planned physics simulation platform) without giving up using current Rust.
+- **License:** dual-licensed MIT OR Apache-2.0 (`LICENSE-MIT`, `LICENSE-APACHE`) — the standard
+  Rust ecosystem convention (Rust itself is licensed this way, and the Rust API Guidelines
+  recommend it). Apache-2.0 adds an explicit patent grant MIT alone lacks; as an "OR" license
+  this is strictly more permissive than MIT alone, not more restrictive.
+- **Crate names:** `celeris` for the numerical core, `celeris-analysis` for the analysis/
+  benchmarking tool crate — hyphenated-suffix naming, a common convention for auxiliary crates
+  in a Rust workspace.
+- Still open (researching): clippy/rustfmt configuration baseline, and the `unsafe`
+  safety-comment convention for the `simd` module.
 
 ## Non-goals (for MVP)
 
