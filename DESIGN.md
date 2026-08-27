@@ -36,6 +36,10 @@ each other:
 
 ## Components
 
+Celeris is organized as a Cargo workspace with (at least) two crates: the numerical core library
+(vector/matrix/simd, below) and a separate analysis/benchmarking tool crate — see Design
+decisions for why this is split rather than one crate. Exact crate names not yet decided.
+
 ### vector
 
 Core vector operations: addition, subtraction, scaling, dot product, outer product (produces a
@@ -67,7 +71,14 @@ CPU/GPU crossover point.
 ### scripts
 
 Python/NumPy reference implementations used only for benchmark comparison — not a dependency
-of the Rust core itself.
+of the Rust core itself. Also home to the `pyperf`-based NumPy benchmarking script (see
+Benchmark methodology), run as its own standalone Python process.
+
+### analysis (separate crate, in Rust)
+
+Combines `criterion`'s Rust-side benchmark output with the Python-side `pyperf` output into one
+comparison report. See Benchmark methodology for the MVP vs. post-MVP shape of this tool, and
+Design decisions for why it's a separate crate rather than part of the core library.
 
 ## Correctness verification
 
@@ -160,16 +171,64 @@ Python side. `npyz` was chosen over `ndarray-npy` specifically because Celeris d
 while `npyz` works directly from a raw `Vec<f64>`/slice, which is what Celeris's own storage
 would need to be converted to for export regardless of which library was used.
 
+Benchmark hardware/environment recording: on the Python side, `pyperf` (chosen over
+`pytest-benchmark`, which is built as a pytest plugin rather than a standalone tool) captures
+this by default — CPU model, core count, frequency, OS/platform, memory, load average, and more.
+On the Rust side, `criterion` doesn't capture this itself, and research confirmed no existing
+Rust crate bundles both a benchmarking engine and system metadata capture the way `pyperf` does
+— the established pattern is pairing a benchmarking crate with `sysinfo` for this. So a small
+separate module handles it: `sysinfo` for general CPU/system info, and `raw-cpuid` for precise
+CPU feature-flag confirmation (directly answering whether AVX2/FMA are actually available on the
+benchmarking machine — more precise than anything `pyperf` itself offers, since it queries the
+CPU's feature bits directly). This module runs alongside `criterion`'s benchmarks rather than
+replacing them — `criterion` already handles the actual measurement engine (calibration,
+warm-up, statistics) well; the gap was narrowly about metadata, not the measurement core, so no
+reason to duplicate that engine. (Two adjacent tools surfaced during research but don't apply:
+`divan`, a newer `criterion` alternative with a simpler API, doesn't capture system metadata
+either; `iai`/`iai-callgrind` measures CPU instructions via Cachegrind rather than wall-clock
+time — a different, complementary measurement philosophy, not a replacement for this comparison.)
+
+**Combining `criterion` and `pyperf` output — MVP vs. post-MVP shape.** `criterion`'s only
+version-stable output is `raw.csv` (its JSON files — `estimates.json`, `sample.json`,
+`tukey.json` — are explicitly documented as private and can change without warning); `pyperf`
+writes JSON with raw per-sample `values`. Rather than forcing either tool to conform to the
+other's format upstream, both benchmarking tools record natively, and a separate Rust crate (see
+Components: analysis) does whatever conversion is needed at comparison time:
+
+- **MVP (minimal, narrow, manual):** a small script reading the specific known CSV columns and
+  JSON fields this project's specific benchmarks produce (no general-purpose/robust parsing of
+  arbitrary future formats). Presents each tool's own already-computed summary statistic (e.g.
+  each one's reported mean) side by side, accepting that they're computed via slightly different
+  methodologies as one more uncontrolled difference (the same move already made for row-major vs.
+  column-major layout) rather than recomputing matched statistics from raw samples. Prints both
+  tools' metadata blocks one after another rather than unifying them into one schema.
+- **Post-MVP (general, automated, rigorous):** robust parsing that isn't tied to today's specific
+  benchmark set, statistics recomputed identically from both tools' raw per-sample data
+  (`raw.csv`'s `sample_measured_value`, `pyperf`'s `values`) for a true 1-to-1 methodological fit
+  rather than trusting each tool's own summary computation, and a unified metadata schema. This
+  extends/replaces the existing "CLI or visualization tool" roadmap item (see roadmap).
+
 Still being researched, not yet decided:
-- Matching `criterion`'s statistical rigor (warm-up, outlier handling) on the Python/NumPy side.
-- Exact JSON schema, and how `criterion`'s own output format gets combined with the Python-side
-  JSON.
-- What to record about the benchmarking hardware/environment (CPU model, confirmed AVX2/FMA
-  status, etc.) alongside results.
+- Matching `criterion`'s statistical rigor (warm-up, outlier handling) against `pyperf`'s on the
+  Python/NumPy side — comparing what stats each tool actually reports, to see how close a fit
+  is achievable (feeds into the post-MVP matched-statistics work above).
 - The actual sweep size range — depends on two still-open items from Topic 1: realistic
   vector/matrix sizes in scientific computing, and the real safe stack-size ceiling.
 
 ## Design decisions
+
+- **Cargo workspace with separate crates for the numerical core and the analysis/benchmarking
+  tool, decided for MVP (not deferred):** this is the standard, idiomatic pattern in Rust for a
+  core library plus supporting tooling that isn't part of its public API (sometimes called the
+  "xtask" pattern) — not over-engineering for this shape of problem. Concretely, it keeps the
+  core library's dependency footprint lean: the analysis tool needs CSV/JSON-parsing
+  dependencies the core library has no reason to carry, which matters because the core library is
+  meant to be consumed by other projects (see Purpose: the planned physics simulation platform)
+  that would otherwise transitively inherit those dependencies for no reason. Decided for MVP
+  rather than deferred specifically because — unlike other MVP/post-MVP splits in this document —
+  this is an organizational choice, not new capability: since both crates are being written for
+  the first time regardless, setting up the workspace now costs little, while retrofitting it
+  after code already exists tangled together in one crate would mean real refactoring later.
 
 - **Column-major matrix storage:** Neither row-major nor column-major is inherently faster —
   cache-friendliness depends on whether traversal order matches the storage layout, and this cuts
@@ -278,7 +337,11 @@ Still being researched, not yet decided:
 - **`f32` support** alongside `f64`, including benchmarking the precision/speed tradeoff between them.
 - **Multi-threading (Rayon)** layered on top of SIMD, parallelizing across cores in addition to
   within them.
-- **CLI or visualization tool** to chart benchmark sweep data rather than only printing numbers.
+- **General, automated, statistically-matched analysis tool** (see Benchmark methodology) —
+  robust parsing not tied to today's specific benchmark set, statistics recomputed identically
+  from both `criterion`'s and `pyperf`'s raw per-sample data, unified metadata schema, and a CLI
+  or visualization layer to chart sweep data rather than only printing numbers. Replaces MVP's
+  minimal side-by-side version.
 - **Continuous benchmarking / CI regression tracking via Bencher**, layered on top of `criterion`
   (which remains the actual measurement engine) to track performance across commits/PRs over
   time and catch regressions in CI — distinct from the single-run visualization tool above.

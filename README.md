@@ -14,13 +14,19 @@ Early development. Core vector and matrix operations are being built incremental
 
 ## Project Structure
 
+Celeris is a Cargo workspace with (at least) two crates — the numerical core library, and a
+separate analysis/benchmarking tool crate (kept separate so the core library's dependencies stay
+lean for downstream consumers — see DESIGN.md). Exact crate names not yet decided.
+
 ```
-/src
-  /vector    — vector operations (add, scale, dot product, etc.)
-  /matrix    — matrix operations (multiply, transpose, etc.)
-  /simd      — AVX2 intrinsics via std::arch, wrapped for internal use
-/benches     — criterion benchmarks (naive Rust vs. SIMD Rust vs. NumPy)
-/scripts     — NumPy reference implementations used for benchmark comparison
+/<core crate>
+  /src
+    /vector    — vector operations (add, scale, dot product, etc.)
+    /matrix    — matrix operations (multiply, transpose, etc.)
+    /simd      — AVX2 intrinsics via std::arch, wrapped for internal use
+  /benches     — criterion benchmarks (naive Rust vs. SIMD Rust vs. NumPy)
+/<analysis crate> — combines criterion + pyperf output into one comparison report (Rust)
+/scripts          — NumPy reference implementations + pyperf benchmarking script (Python)
 ```
 
 ## Scope
