@@ -40,13 +40,43 @@ Celeris is organized as a Cargo workspace with two crates: `celeris` (the numeri
 vector/matrix/simd, below) and `celeris-analysis` (the analysis/benchmarking tool crate) — see
 Design decisions and Project mechanics for why it's split and how the crates are named.
 
+### File layout (`celeris` crate)
+
+Source is organized by tier first, type second, rather than by type first:
+
+```
+src/
+  lib.rs            # wiring only — mod declarations, pub use re-exports, crate doc comment
+  vector.rs         # Vector<N> type definition: fields, From/TryFrom, .get(), etc.
+  matrix.rs         # Matrix type definition (post-MVP)
+  naive/
+    mod.rs
+    vector.rs       # naive Vector<N> operations
+    matrix.rs       # naive Matrix operations (post-MVP)
+  simd/
+    mod.rs
+    vector.rs       # safe SIMD Vector<N> operations, built on primitives.rs
+    matrix.rs       # safe SIMD Matrix operations (post-MVP)
+    primitives.rs   # raw unsafe AVX2 intrinsic wrappers, shared across vector/matrix
+```
+
+Grouping by tier (rather than nesting both tiers' operations under each type) mirrors the
+planned post-MVP CPU-dispatch chain (see Post-MVP roadmap), where each tier needs to expose
+the same set of operations for a runtime dispatcher to pick between — keeping each tier's
+operations together makes that easier to see and to extend when a new instruction-set tier is
+added. `simd/primitives.rs` isolates all raw intrinsic calls (and their safety justifications)
+behind safe wrapper functions, rather than scattering `unsafe` blocks across every operation;
+it's a separate file from `simd/vector.rs` specifically so `matrix.rs`'s SIMD path can reuse the
+same primitives without duplicating unsafe code.
+
 ### vector
 
 Core vector operations: addition, subtraction, scaling, dot product, outer product (produces a
 matrix), Euclidean (L2) and Manhattan (L1) norms (defined for any size `N`), and other standard
 vector arithmetic — exact remaining scope still being finalized (see Design decisions). Cross
 product is a planned early post-MVP addition, not MVP (see Design decisions and roadmap).
-Implemented three times per the architecture above (naive, SIMD, and the NumPy reference script).
+Implemented three times per the architecture above (naive, SIMD, and the NumPy reference script)
+— see File layout above for where each lives.
 
 ### matrix
 
@@ -59,7 +89,8 @@ remaining scope still being finalized. Same three-way implementation pattern as 
 ### simd
 
 Internal wrappers around AVX2 intrinsics (`std::arch::x86_64`), isolating unsafe SIMD code
-behind a safe interface used by the vector and matrix modules.
+behind a safe interface used by the vector and matrix modules. See File layout above for the
+`simd/primitives.rs` vs. `simd/vector.rs` split.
 
 ### benches
 
