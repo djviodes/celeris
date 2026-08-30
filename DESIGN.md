@@ -365,6 +365,15 @@ revisiting once real operation code exists.
   replacing MVP's hardcoded AVX2 assumption, so the crate can run correctly (with graceful
   degradation or best-available instruction set) on hardware other than the author's own —
   relevant if this ever moves beyond a personal learning project toward wider distribution.
+  Tiered fallback chain: try the best available instruction set first (AVX-512, then AVX2, etc.),
+  covering as much real-world hardware as practical — but since no fixed set of instruction-set
+  implementations can ever cover 100% of machines, **the naive Rust implementation is the final
+  fallback tier**, used whenever no covered SIMD instruction set is detected, so the library keeps
+  working (at reduced performance) rather than failing outright. This means naive isn't purely a
+  benchmark-comparison artifact — it's load-bearing for this future dispatch chain, which is worth
+  keeping in mind even now, in MVP, while implementing it (e.g. it likely needs at least `pub`
+  visibility rather than fully private, since `criterion` benchmarks compile as an external
+  dependent of the crate and need to reach it regardless).
   The MVP decision to hardcode AVX2 was made on intuition, not research — research still needed
   before implementing this item:
   - `is_x86_feature_detected!` — how it works, when the check happens, and its cost.
