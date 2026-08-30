@@ -48,3 +48,10 @@ impl<const N: usize> TryFrom<&[f64]> for Vector<N> {
         Ok(Self { elements })
     }
 }
+
+impl<const N: usize> Vector<N> {
+    #[must_use]
+    pub fn get(&self, index: usize) -> Option<&f64> {
+        (index < N).then(|| &self.elements[index])
+    }
+}
