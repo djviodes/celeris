@@ -35,4 +35,19 @@ impl<const N: usize> Vector<N> {
 
         Vector::from(array)
     }
+
+    /// # Panics
+    ///
+    /// `scale` cannot panic because `from_fn`'s contract guarantees the index is valid
+    #[must_use]
+    pub fn scale(scalar: f64, vector: &Vector<N>) -> Vector<N> {
+        let array: [f64; N] = from_fn(|i| {
+            vector
+                .get(i)
+                .expect("index from from_fn is always in bounds")
+                * scalar
+        });
+
+        Vector::from(array)
+    }
 }
