@@ -50,4 +50,22 @@ impl<const N: usize> Vector<N> {
 
         Vector::from(array)
     }
+
+    /// # Panics
+    ///
+    /// `dot` cannot panic because the `map` iterator only iterates between 0 and N - 1 elements
+    /// which is always the size of the parameter vectors
+    #[must_use]
+    pub fn dot(vector_1: &Vector<N>, vector_2: &Vector<N>) -> f64 {
+        (0..N)
+            .map(|i| {
+                vector_1
+                    .get(i)
+                    .expect("index from the map iterator is always in bounds")
+                    * vector_2
+                        .get(i)
+                        .expect("index from the map iterator is always in bounds")
+            })
+            .sum()
+    }
 }
