@@ -405,6 +405,11 @@ revisiting once real operation code exists.
   keeping in mind even now, in MVP, while implementing it (e.g. it likely needs at least `pub`
   visibility rather than fully private, since `criterion` benchmarks compile as an external
   dependent of the crate and need to reach it regardless).
+  Operator traits (`Add`, `Sub`, etc.) belong to this future dispatch layer, not to any
+individual tier: Rust's trait coherence rules allow only one `impl Add for Vector<N>` to exist,
+so whichever code picks the tier at runtime is the only place that can own the `+` operator.
+Each tier (`naive`, `simd`, ...) instead exposes plain named functions (e.g. `naive::vector::add`)
+for MVP; operator overloading on `Vector<N>` itself doesn't exist until the dispatch layer does.
   The MVP decision to hardcode AVX2 was made on intuition, not research — research still needed
   before implementing this item:
   - `is_x86_feature_detected!` — how it works, when the check happens, and its cost.
