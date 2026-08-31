@@ -80,6 +80,23 @@ Implemented three times per the architecture above (naive, SIMD, and the NumPy r
 
 ### matrix
 
+`Matrix<const M: usize, const N: usize>`, where `M` is the number of rows and `N` the number of
+columns, matching standard mathematical notation (an "m × n matrix" has m rows, n columns) and
+nalgebra's `Matrix<T, R, C, S>` ordering — a deliberate choice, since `M`/`N` are two same-typed
+const generic parameters and swapping their meaning would be a silent, compiler-invisible bug
+risk (the same category of risk as `VectorError`'s named fields and `subtract`'s
+`minuend`/`subtrahend` naming). Storage is a nested array (e.g. `[[f64; M]; N]`, an array of
+columns) rather than a flat `[f64; M * N]` buffer, since a flat buffer's size would require
+evaluating `M * N` at the type level from two separate generic parameters — exactly the
+`generic_const_exprs` nightly-only feature already ruled out for `Vector<N>`'s padding plan (see
+SIMD remainder handling and memory alignment).
+
+Public element access is `.get(row, col)`, matching row-then-column reading order. Internally
+this indexes the column-major storage as `elements[col][row]` — outer index selects the column,
+inner index selects the row within it — the reverse order from both the public API and the
+`Matrix<M, N>` type parameters, an unavoidable consequence of column-major layout rather than a
+bug, but worth keeping explicit in the `.get(row, col)` → `elements[col][row]` translation.
+
 Core matrix operations: addition, subtraction, scaling, matrix-matrix multiplication,
 matrix-vector multiplication, transpose, determinant (1×1, 2×2, and 3×3 only for MVP — see
 Design decisions), Frobenius norm, matrix 1-norm (max absolute column sum), and matrix ∞-norm
