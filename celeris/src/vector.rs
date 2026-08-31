@@ -36,9 +36,9 @@ impl<const N: usize> From<[f64; N]> for Vector<N> {
 impl<const N: usize> TryFrom<&[f64]> for Vector<N> {
     type Error = VectorError;
 
-    fn try_from(vec: &[f64]) -> Result<Self, Self::Error> {
-        let elements: [f64; N] = vec.try_into().map_err(|_| VectorError::InvalidLength {
-            received: vec.len(),
+    fn try_from(vector: &[f64]) -> Result<Self, Self::Error> {
+        let elements: [f64; N] = vector.try_into().map_err(|_| VectorError::InvalidLength {
+            received: vector.len(),
             expected: N,
         })?;
         Ok(Self { elements })
