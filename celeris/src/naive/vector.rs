@@ -91,4 +91,26 @@ impl<const N: usize> Vector<N> {
 
         Matrix::from(matrix)
     }
+
+    #[must_use]
+    pub fn euclidean_norm(vector: &Vector<N>) -> f64 {
+        f64::sqrt(Vector::dot(vector, vector))
+    }
+
+    /// # Panics
+    ///
+    /// `manhattan_norm` cannot panic because the `map` iterator only iterates between 0 and
+    /// N - 1 elements which is always the size of the parameter vectors
+    #[must_use]
+    pub fn manhattan_norm(vector: &Vector<N>) -> f64 {
+        (0..N)
+            .map(|i| {
+                f64::abs(
+                    *vector
+                        .get(i)
+                        .expect("index from the map iterator is always in bounds"),
+                )
+            })
+            .sum()
+    }
 }
