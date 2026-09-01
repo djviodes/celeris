@@ -1,3 +1,4 @@
+use crate::Matrix;
 use crate::Vector;
 use std::array::from_fn;
 
@@ -67,5 +68,27 @@ impl<const N: usize> Vector<N> {
                         .expect("index from the map iterator is always in bounds")
             })
             .sum()
+    }
+
+    /// # Panics
+    ///
+    /// `outer` cannot panic because `from_fn`'s contract guarantees the index is valid
+    #[must_use]
+    pub fn outer<const M: usize>(
+        column_vector: &Vector<M>,
+        row_vector: &Vector<N>,
+    ) -> Matrix<M, N> {
+        let matrix: [[f64; M]; N] = from_fn(|column| {
+            from_fn(|row| {
+                column_vector
+                    .get(row)
+                    .expect("index from from_fn is always in bounds")
+                    * row_vector
+                        .get(column)
+                        .expect("index from from_fn is always in bounds")
+            })
+        });
+
+        Matrix::from(matrix)
     }
 }
