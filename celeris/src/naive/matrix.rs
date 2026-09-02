@@ -1,0 +1,59 @@
+use crate::Matrix;
+use std::array::from_fn;
+
+impl<const M: usize, const N: usize> Matrix<M, N> {
+    /// # Panics
+    ///
+    /// `add` cannot panic because `from_fn`'s contract guarantees the index is valid
+    #[must_use]
+    pub fn add(addend_1: &Matrix<M, N>, addend_2: &Matrix<M, N>) -> Matrix<M, N> {
+        let matrix: [[f64; M]; N] = from_fn(|column| {
+            from_fn(|row| {
+                addend_1
+                    .get(row, column)
+                    .expect("index from from_fn is always in bounds")
+                    + addend_2
+                        .get(row, column)
+                        .expect("index from from_fn is always in bounds")
+            })
+        });
+
+        Matrix::from(matrix)
+    }
+
+    /// # Panics
+    ///
+    /// `subtract` cannot panic because `from_fn`'s contract guarantees the index is valid
+    #[must_use]
+    pub fn subtract(minuend: &Matrix<M, N>, subtrahend: &Matrix<M, N>) -> Matrix<M, N> {
+        let matrix: [[f64; M]; N] = from_fn(|column| {
+            from_fn(|row| {
+                minuend
+                    .get(row, column)
+                    .expect("index from from_fn is always in bounds")
+                    - subtrahend
+                        .get(row, column)
+                        .expect("index from from_fn is always in bounds")
+            })
+        });
+
+        Matrix::from(matrix)
+    }
+
+    /// # Panics
+    ///
+    /// `scale` cannot panic because `from_fn`'s contract guarantees the index is valid
+    #[must_use]
+    pub fn scale(scalar: f64, matrix: &Matrix<M, N>) -> Matrix<M, N> {
+        let scaled_matrix: [[f64; M]; N] = from_fn(|column| {
+            from_fn(|row| {
+                matrix
+                    .get(row, column)
+                    .expect("index from from_fn is always in bounds")
+                    * scalar
+            })
+        });
+
+        Matrix::from(scaled_matrix)
+    }
+}
