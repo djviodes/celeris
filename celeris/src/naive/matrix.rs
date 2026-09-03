@@ -56,4 +56,30 @@ impl<const M: usize, const N: usize> Matrix<M, N> {
 
         Matrix::from(scaled_matrix)
     }
+
+    /// # Panics
+    ///
+    /// `multiply` cannot panic because `from_fn`'s contract guarantees the index is valid
+    #[must_use]
+    pub fn multiply<const P: usize>(
+        multiplicand: &Matrix<M, N>,
+        multiplier: &Matrix<N, P>,
+    ) -> Matrix<M, P> {
+        let matrix: [[f64; M]; P] = from_fn(|p| {
+            from_fn(|m| {
+                (0..N)
+                    .map(|n| {
+                        multiplicand
+                            .get(m, n)
+                            .expect("index from from_fn is always in bounds")
+                            * multiplier
+                                .get(n, p)
+                                .expect("index from from_fn is always in bounds")
+                    })
+                    .sum()
+            })
+        });
+
+        Matrix::from(matrix)
+    }
 }
