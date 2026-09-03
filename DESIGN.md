@@ -427,6 +427,15 @@ individual tier: Rust's trait coherence rules allow only one `impl Add for Vecto
 so whichever code picks the tier at runtime is the only place that can own the `+` operator.
 Each tier (`naive`, `simd`, ...) instead exposes plain named functions (e.g. `naive::vector::add`)
 for MVP; operator overloading on `Vector<N>` itself doesn't exist until the dispatch layer does.
+  Naming convention: since per-tier functions (`naive::vector::add`, etc.) aren't called directly
+by library users — only by the dispatch layer, benchmarks, and other tiers — they're named with
+plain, descriptive (even long) English verbs rather than domain shorthand, matching how they're
+already named. Standard HPC/BLAS routine names (`GEMV`, `GEMM`, `AXPY`, etc.) are reserved for the
+future dispatch layer's public-facing functions, which wrap the tiers' descriptively-named
+functions underneath. BLAS's terse naming stems from FORTRAN 66/77 identifier-length limits, not
+a design property worth preserving internally; its *fused* operations (`AXPY` combining scale-
+and-add in one primitive) reflect a real performance motivation relevant to Celeris's SIMD/FMA
+future, which is a separate, larger question from naming and not yet decided.
   The MVP decision to hardcode AVX2 was made on intuition, not research — research still needed
   before implementing this item:
   - `is_x86_feature_detected!` — how it works, when the check happens, and its cost.
