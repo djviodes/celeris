@@ -1,4 +1,5 @@
 use crate::Matrix;
+use crate::Vector;
 use std::array::from_fn;
 
 impl<const M: usize, const N: usize> Matrix<M, N> {
@@ -81,5 +82,26 @@ impl<const M: usize, const N: usize> Matrix<M, N> {
         });
 
         Matrix::from(matrix)
+    }
+
+    /// # Panics
+    ///
+    /// `matrix_vector_multiplication` cannot panic because `from_fn`'s contract guarantees the index is valid
+    #[must_use]
+    pub fn matrix_vector_multiplication(matrix: &Matrix<M, N>, vector: &Vector<N>) -> Vector<M> {
+        let array: [f64; M] = from_fn(|m| {
+            (0..N)
+                .map(|n| {
+                    matrix
+                        .get(m, n)
+                        .expect("index from from_fn is always in bounds")
+                        * vector
+                            .get(n)
+                            .expect("index from from_fn is always in bounds")
+                })
+                .sum()
+        });
+
+        Vector::from(array)
     }
 }
