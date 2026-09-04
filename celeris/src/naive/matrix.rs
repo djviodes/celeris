@@ -120,6 +120,28 @@ impl<const M: usize, const N: usize> Matrix<M, N> {
 
         Matrix::from(transposed_matrix)
     }
+
+    /// # Panics
+    ///
+    /// `frobenius_norm` cannot panic because the `map` iterator only iterates between 0 and
+    /// N - 1 and then 0 and M - 1 elements which is always the size of the parameter vectors
+    #[must_use]
+    pub fn frobenius_norm(matrix: &Matrix<M, N>) -> f64 {
+        let value: f64 = (0..N)
+            .map(|n| {
+                (0..M)
+                    .map(|m| {
+                        matrix
+                            .get(m, n)
+                            .expect("index from the map iterator is always in bounds")
+                            .powi(2)
+                    })
+                    .sum::<f64>()
+            })
+            .sum();
+
+        value.sqrt()
+    }
 }
 
 impl Matrix<1, 1> {
