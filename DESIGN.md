@@ -146,6 +146,13 @@ checked against each other for correctness, not just speed:
   Pure relative tolerance (and ULP-based comparison) degrade near zero; the combined approach
   avoids that failure mode.
 
+**Sequencing:** each compute tier (naive, then SIMD) gets its own independent golden-value tests
+first, verified against hand-calculated truth rather than against each other — this is what
+actually catches a bug shared across tiers, since oracle/differential testing alone only proves
+two tiers agree, not that either is correct. Oracle/differential testing (cross-tier agreement)
+comes next, once more than one tier exists. Benchmarking comes last, after correctness is
+established at every tier.
+
 NumPy is invoked from the Rust test suite as a subprocess (`std::process::Command`), passing
 inputs as arguments and reading the result back from the script's output, rather than embedding
 Python via PyO3. This keeps Python entirely out of the Rust core's build (consistent with Python/
