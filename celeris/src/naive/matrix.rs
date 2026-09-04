@@ -121,3 +121,88 @@ impl<const M: usize, const N: usize> Matrix<M, N> {
         Matrix::from(transposed_matrix)
     }
 }
+
+impl Matrix<1, 1> {
+    /// # Panics
+    ///
+    /// `determinant_one_by_one` cannot panic because a one by one matrix is guaranteed to have one element
+    #[must_use]
+    pub fn determinant_one_by_one(matrix: &Matrix<1, 1>) -> f64 {
+        *matrix
+            .get(0, 0)
+            .expect("hardcoded index is always in bounds")
+    }
+}
+
+impl Matrix<2, 2> {
+    /// # Panics
+    ///
+    /// `determinant_two_by_two` cannot panic because a two by two matrix is guaranteed to have four elements
+    #[must_use]
+    pub fn determinant_two_by_two(matrix: &Matrix<2, 2>) -> f64 {
+        let a: f64 = *matrix
+            .get(0, 0)
+            .expect("hardcoded index is always in bounds");
+
+        let d: f64 = *matrix
+            .get(1, 1)
+            .expect("hardcoded index is always in bounds");
+
+        let b: f64 = *matrix
+            .get(0, 1)
+            .expect("hardcoded index is always in bounds");
+
+        let c: f64 = *matrix
+            .get(1, 0)
+            .expect("hardcoded index is always in bounds");
+
+        a * d - b * c
+    }
+}
+
+impl Matrix<3, 3> {
+    /// # Panics
+    ///
+    /// `determinant_three_by_three` cannot panic because a three by three matrix is guaranteed to have nine elements
+    #[must_use]
+    #[allow(clippy::many_single_char_names)]
+    pub fn determinant_three_by_three(matrix: &Matrix<3, 3>) -> f64 {
+        let a: f64 = *matrix
+            .get(0, 0)
+            .expect("hardcoded index is always in bounds");
+
+        let b: f64 = *matrix
+            .get(0, 1)
+            .expect("hardcoded index is always in bounds");
+
+        let c: f64 = *matrix
+            .get(0, 2)
+            .expect("hardcoded index is always in bounds");
+
+        let d: f64 = *matrix
+            .get(1, 0)
+            .expect("hardcoded index is always in bounds");
+
+        let e: f64 = *matrix
+            .get(1, 1)
+            .expect("hardcoded index is always in bounds");
+
+        let f: f64 = *matrix
+            .get(1, 2)
+            .expect("hardcoded index is always in bounds");
+
+        let g: f64 = *matrix
+            .get(2, 0)
+            .expect("hardcoded index is always in bounds");
+
+        let h: f64 = *matrix
+            .get(2, 1)
+            .expect("hardcoded index is always in bounds");
+
+        let i: f64 = *matrix
+            .get(2, 2)
+            .expect("hardcoded index is always in bounds");
+
+        a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g)
+    }
+}
