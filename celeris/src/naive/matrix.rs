@@ -104,4 +104,20 @@ impl<const M: usize, const N: usize> Matrix<M, N> {
 
         Vector::from(array)
     }
+
+    /// # Panics
+    ///
+    /// `transpose` cannot panic because `from_fn`'s contract guarantees the index is valid
+    #[must_use]
+    pub fn transpose(matrix: &Matrix<M, N>) -> Matrix<N, M> {
+        let transposed_matrix: [[f64; N]; M] = from_fn(|m| {
+            from_fn(|n| {
+                *matrix
+                    .get(m, n)
+                    .expect("index from from_fn is always in bounds")
+            })
+        });
+
+        Matrix::from(transposed_matrix)
+    }
 }
