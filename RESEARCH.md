@@ -41,3 +41,18 @@ topic, in no particular order or urgency.
   operations. So "AVX vs. AVX2 vs. AVX-512" isn't three evenly-spaced steps for this project's
   purely-`f64` workload the way the naming implies — worth understanding the actual differences
   precisely before building the post-MVP multi-instruction-set dispatch.
+
+## From: naive golden-value test magnitude scoping (2026-09-05)
+
+- **Unit-convention practice in particle/molecular simulation codes.** Came up while deciding how
+  extreme a magnitude naive's golden-value tests should cover for the eventual physics-sim use
+  case. Many simulation codes rescale into "reduced units" specifically to keep quantities near
+  order-1 rather than working in raw SI magnitudes — if that's standard practice, it changes what
+  "realistic" magnitude actually means for this library, rather than assuming raw physical
+  quantities (e.g. femtometer-scale) are the real target.
+- **`f64` precision behavior across its representable range.** Three related but distinct things
+  worth understanding precisely: (1) the smallest magnitude `f64` can represent at all (~1e-308,
+  far past anything tested so far), (2) how much relative precision it retains at a given
+  magnitude, and (3) what happens when values of very different magnitudes are combined in one
+  operation (the tiny one can vanish entirely) — this third one is the same mechanism as the
+  already-noted catastrophic cancellation research above, not a separate topic.

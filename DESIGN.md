@@ -47,7 +47,7 @@ Source is organized by tier first, type second, rather than by type first:
 ```
 src/
   lib.rs            # wiring only — mod declarations, pub use re-exports, crate doc comment
-  vector.rs         # Vector<N> type definition: fields, From/TryFrom, .get(), etc.
+  vector.rs         # Vector<N> type definition: fields, From/TryFrom, .get(), .len(), etc.
   matrix.rs         # Matrix type definition (post-MVP)
   naive/
     mod.rs
@@ -200,6 +200,11 @@ failure is a programmer logic error or genuinely external/untrusted data:
   This data genuinely originates outside the program's control, so the caller needs context to
   understand and handle the failure, per Rust API Guidelines: don't panic on invalid external
   input, return `Result` instead.
+
+`.len()` (mirroring `slice::len()`) is infallible and needs no error handling at all — a
+`Vector<N>`'s length is `N`, a compile-time constant, so there's nothing to fail. Added when
+writing golden-value tests surfaced the need for callers to query a vector's size without already
+knowing `N`.
 
 ## Benchmark methodology
 
@@ -477,3 +482,11 @@ future, which is a separate, larger question from naming and not yet decided.
   actual norm operations rather than alongside them; exact API placement not yet decided.
 - **Python bindings via PyO3**, allowing the Rust core to be called from Python — a direct
   parallel to how NumPy itself works under the hood (a compiled, fast core exposed to Python).
+- **Physically-realistic-magnitude precision testing** — golden-value tests at MVP cover small,
+  normal, and large magnitudes chosen for reasonable coverage, not derived from what the planned
+  physics simulation platform would actually need. Deferred because the right target magnitude
+  depends on unresolved research (see RESEARCH.md: unit-convention and `f64` precision-boundary
+  research), which would otherwise block already-well-scoped MVP test-writing — same shape as the
+  AVX2-hardcoding and catastrophic-cancellation deferrals already made. Revisit once that research
+  is done, potentially as a dedicated extreme-magnitude test suite alongside the MVP one rather
+  than replacing it.
