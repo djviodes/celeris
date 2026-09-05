@@ -2,6 +2,7 @@ use std::error::Error;
 use std::fmt;
 
 #[repr(C, align(32))]
+#[derive(Debug)]
 pub struct Vector<const N: usize> {
     elements: [f64; N],
 }
@@ -49,5 +50,15 @@ impl<const N: usize> Vector<N> {
     #[must_use]
     pub fn get(&self, index: usize) -> Option<&f64> {
         (index < N).then(|| &self.elements[index])
+    }
+
+    #[must_use]
+    pub fn len(&self) -> usize {
+        N
+    }
+
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        N == 0
     }
 }
