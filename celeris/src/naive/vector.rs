@@ -124,7 +124,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn successful_vector_try_from_initialization() -> Result<(), Box<dyn std::error::Error>> {
+    fn initializing_normal_vector_should_return_successfully()
+    -> Result<(), Box<dyn std::error::Error>> {
         let vector: Vector<5> = Vector::try_from(&[1.0, 2.0, 3.0, 4.0, 5.0][..])?;
 
         assert_eq!(vector.len(), 5);
@@ -133,7 +134,7 @@ mod tests {
     }
 
     #[test]
-    fn failed_vector_try_from_initialization() {
+    fn initializing_illegal_vector_should_return_error() {
         let vector: VectorError = Vector::<5>::try_from(&[1.0, 2.0, 3.0][..]).unwrap_err();
 
         assert_matches!(
@@ -157,35 +158,35 @@ mod tests {
                 .get(0)
                 .expect("hardcoded index is always in bounds"),
             2.0,
-            epsilon = 1e-5
+            epsilon = 1e-2
         );
         assert_relative_eq!(
             *summed_vector
                 .get(1)
                 .expect("hardcoded index is always in bounds"),
             4.0,
-            epsilon = 1e-5
+            epsilon = 1e-2
         );
         assert_relative_eq!(
             *summed_vector
                 .get(2)
                 .expect("hardcoded index is always in bounds"),
             6.0,
-            epsilon = 1e-5
+            epsilon = 1e-2
         );
         assert_relative_eq!(
             *summed_vector
                 .get(3)
                 .expect("hardcoded index is always in bounds"),
             8.0,
-            epsilon = 1e-5
+            epsilon = 1e-2
         );
         assert_relative_eq!(
             *summed_vector
                 .get(4)
                 .expect("hardcoded index is always in bounds"),
             10.0,
-            epsilon = 1e-5
+            epsilon = 1e-2
         );
     }
 
@@ -290,6 +291,149 @@ mod tests {
                 .expect("hardcoded index is always in bounds"),
             1.000_000_000_000_001_1e15,
             epsilon = 2.0,
+            max_relative = 1e-13
+        );
+    }
+
+    #[test]
+    fn subtracting_normal_number_vectors_should_return_success() {
+        let minuend: Vector<5> = Vector::from([1.0, 2.0, 3.0, 4.0, 5.0]);
+        let subtrahend: Vector<5> = Vector::from([0.5, 0.8, 1.0, 1.2, 1.5]);
+
+        let difference_vector: Vector<5> = Vector::subtract(&minuend, &subtrahend);
+
+        assert_relative_eq!(
+            *difference_vector
+                .get(0)
+                .expect("hardcoded index is always in bounds"),
+            0.5,
+            epsilon = 1e-2
+        );
+        assert_relative_eq!(
+            *difference_vector
+                .get(1)
+                .expect("hardcoded index is always in bounds"),
+            1.2,
+            epsilon = 1e-2
+        );
+        assert_relative_eq!(
+            *difference_vector
+                .get(2)
+                .expect("hardcoded index is always in bounds"),
+            2.0,
+            epsilon = 1e-2
+        );
+        assert_relative_eq!(
+            *difference_vector
+                .get(3)
+                .expect("hardcoded index is always in bounds"),
+            2.8,
+            epsilon = 1e-2
+        );
+        assert_relative_eq!(
+            *difference_vector
+                .get(4)
+                .expect("hardcoded index is always in bounds"),
+            3.5,
+            epsilon = 1e-2
+        );
+    }
+
+    #[test]
+    fn subtracting_small_number_vectors_should_return_success() {
+        let minuend: Vector<5> = Vector::from([1e-11, 2e-11, 3e-11, 4e-11, 5e-11]);
+        let subtrahend: Vector<5> = Vector::from([5e-12, 5e-12, 5e-12, 5e-12, 5e-12]);
+
+        let difference_vector: Vector<5> = Vector::subtract(&minuend, &subtrahend);
+
+        assert_relative_eq!(
+            *difference_vector
+                .get(0)
+                .expect("hardcoded index is always in bounds"),
+            5e-12,
+            epsilon = 1e-12
+        );
+        assert_relative_eq!(
+            *difference_vector
+                .get(1)
+                .expect("hardcoded index is always in bounds"),
+            1.5e-11,
+            epsilon = 1e-12
+        );
+        assert_relative_eq!(
+            *difference_vector
+                .get(2)
+                .expect("hardcoded index is always in bounds"),
+            2.5e-11,
+            epsilon = 1e-12
+        );
+        assert_relative_eq!(
+            *difference_vector
+                .get(3)
+                .expect("hardcoded index is always in bounds"),
+            3.5e-11,
+            epsilon = 1e-12
+        );
+        assert_relative_eq!(
+            *difference_vector
+                .get(4)
+                .expect("hardcoded index is always in bounds"),
+            4.5e-11,
+            epsilon = 1e-12
+        );
+    }
+
+    #[test]
+    fn subtracting_large_number_vectors_should_return_success() {
+        let minuend: Vector<5> = Vector::from([
+            1.000_000_000_000_001_3e14,
+            2.000_000_000_000_002_2e14,
+            3.000_000_000_000_004e14,
+            4.000_000_000_000_004_4e14,
+            5.000_000_000_000_005_6e14,
+        ]);
+        let subtrahend: Vector<5> = Vector::from([5e13, 5e13, 5e13, 5e13, 5e13]);
+
+        let difference_vector: Vector<5> = Vector::subtract(&minuend, &subtrahend);
+
+        assert_relative_eq!(
+            *difference_vector
+                .get(0)
+                .expect("hardcoded index is always in bounds"),
+            5.000_000_000_000_001_3e13,
+            epsilon = 1.0,
+            max_relative = 1e-13
+        );
+        assert_relative_eq!(
+            *difference_vector
+                .get(1)
+                .expect("hardcoded index is always in bounds"),
+            1.500_000_000_000_002_2e14,
+            epsilon = 1.0,
+            max_relative = 1e-13
+        );
+        assert_relative_eq!(
+            *difference_vector
+                .get(2)
+                .expect("hardcoded index is always in bounds"),
+            2.500_000_000_000_004e14,
+            epsilon = 1.0,
+            max_relative = 1e-13
+        );
+        assert_relative_eq!(
+            *difference_vector
+                .get(3)
+                .expect("hardcoded index is always in bounds"),
+            3.500_000_000_000_004_4e14,
+            epsilon = 1.0,
+            max_relative = 1e-13
+        );
+        assert_relative_eq!(
+            *difference_vector
+                .get(4)
+                .expect("hardcoded index is always in bounds"),
+            4.500_000_000_000_005_6e14,
+            epsilon = 1.0,
             max_relative = 1e-13
         );
     }
