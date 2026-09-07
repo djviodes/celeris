@@ -437,4 +437,147 @@ mod tests {
             max_relative = 1e-13
         );
     }
+
+    #[test]
+    fn scaling_normal_number_vectors_should_return_success() {
+        let scalar: f64 = 2.0;
+        let vector: Vector<5> = Vector::from([1.0, 2.0, 3.0, 4.0, 5.0]);
+
+        let scaled_vector: Vector<5> = Vector::scale(scalar, &vector);
+
+        assert_relative_eq!(
+            *scaled_vector
+                .get(0)
+                .expect("hardcoded index is always in bounds"),
+            2.0,
+            epsilon = 1e-2
+        );
+        assert_relative_eq!(
+            *scaled_vector
+                .get(1)
+                .expect("hardcoded index is always in bounds"),
+            4.0,
+            epsilon = 1e-2
+        );
+        assert_relative_eq!(
+            *scaled_vector
+                .get(2)
+                .expect("hardcoded index is always in bounds"),
+            6.0,
+            epsilon = 1e-2
+        );
+        assert_relative_eq!(
+            *scaled_vector
+                .get(3)
+                .expect("hardcoded index is always in bounds"),
+            8.0,
+            epsilon = 1e-2
+        );
+        assert_relative_eq!(
+            *scaled_vector
+                .get(4)
+                .expect("hardcoded index is always in bounds"),
+            10.0,
+            epsilon = 1e-2
+        );
+    }
+
+    #[test]
+    fn scaling_small_number_vectors_should_return_success() {
+        let scalar: f64 = 2.0;
+        let vector: Vector<5> = Vector::from([1e-12, 2e-12, 3e-12, 4e-12, 5e-12]);
+
+        let scaled_vector: Vector<5> = Vector::scale(scalar, &vector);
+
+        assert_relative_eq!(
+            *scaled_vector
+                .get(0)
+                .expect("hardcoded index is always in bounds"),
+            2e-12,
+            epsilon = 1e-12
+        );
+        assert_relative_eq!(
+            *scaled_vector
+                .get(1)
+                .expect("hardcoded index is always in bounds"),
+            4e-12,
+            epsilon = 1e-12
+        );
+        assert_relative_eq!(
+            *scaled_vector
+                .get(2)
+                .expect("hardcoded index is always in bounds"),
+            6e-12,
+            epsilon = 1e-12
+        );
+        assert_relative_eq!(
+            *scaled_vector
+                .get(3)
+                .expect("hardcoded index is always in bounds"),
+            8e-12,
+            epsilon = 1e-12
+        );
+        assert_relative_eq!(
+            *scaled_vector
+                .get(4)
+                .expect("hardcoded index is always in bounds"),
+            1e-11,
+            epsilon = 1e-12
+        );
+    }
+
+    #[test]
+    fn scaling_large_number_vectors_should_return_success() {
+        let scalar: f64 = 2.0;
+        let vector: Vector<5> = Vector::from([
+            1.000_000_000_000_001_3e14,
+            2.000_000_000_000_002_2e14,
+            3.000_000_000_000_004e14,
+            4.000_000_000_000_004_4e14,
+            4.500_000_000_000_003e14,
+        ]);
+
+        let scaled_vector: Vector<5> = Vector::scale(scalar, &vector);
+
+        assert_relative_eq!(
+            *scaled_vector
+                .get(0)
+                .expect("hardcoded index is always in bounds"),
+            2.000_000_000_000_002_6e14,
+            epsilon = 1.0,
+            max_relative = 1e-15
+        );
+        assert_relative_eq!(
+            *scaled_vector
+                .get(1)
+                .expect("hardcoded index is always in bounds"),
+            4.000_000_000_000_004_4e14,
+            epsilon = 1.0,
+            max_relative = 1e-15
+        );
+        assert_relative_eq!(
+            *scaled_vector
+                .get(2)
+                .expect("hardcoded index is always in bounds"),
+            6.000_000_000_000_008e14,
+            epsilon = 1.0,
+            max_relative = 1e-15
+        );
+        assert_relative_eq!(
+            *scaled_vector
+                .get(3)
+                .expect("hardcoded index is always in bounds"),
+            8.000_000_000_000_009e14,
+            epsilon = 1.0,
+            max_relative = 1e-15
+        );
+        assert_relative_eq!(
+            *scaled_vector
+                .get(4)
+                .expect("hardcoded index is always in bounds"),
+            9.000_000_000_000_006e14,
+            epsilon = 1.0,
+            max_relative = 1e-15
+        );
+    }
 }
