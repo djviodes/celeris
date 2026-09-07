@@ -48,11 +48,11 @@ Source is organized by tier first, type second, rather than by type first:
 src/
   lib.rs            # wiring only — mod declarations, pub use re-exports, crate doc comment
   vector.rs         # Vector<N> type definition: fields, From/TryFrom, .get(), Index/IndexMut, .len(), etc.
-  matrix.rs         # Matrix type definition (post-MVP)
+  matrix.rs         # Matrix<M, N> type definition: fields, From/TryFrom, .get(), Index/IndexMut
   naive/
     mod.rs
     vector.rs       # naive Vector<N> operations
-    matrix.rs       # naive Matrix operations (post-MVP)
+    matrix.rs       # naive Matrix<M, N> operations
   simd/
     mod.rs
     vector.rs       # safe SIMD Vector<N> operations, built on primitives.rs
@@ -96,6 +96,14 @@ this indexes the column-major storage as `elements[col][row]` — outer index se
 inner index selects the row within it — the reverse order from both the public API and the
 `Matrix<M, N>` type parameters, an unavoidable consequence of column-major layout rather than a
 bug, but worth keeping explicit in the `.get(row, col)` → `elements[col][row]` translation.
+
+`Matrix<M, N>` also implements `Index`/`IndexMut` over a `(usize, usize)` tuple (`matrix[(row,
+col)]`), rather than chained single-`usize` indexing (`matrix[row][col]`). Chained indexing would
+require `Index<usize>` to return an intermediate row/column view type that itself implements
+`Index<usize>` — a real piece of additional API surface, not just a syntax choice — so the tuple
+form was chosen as the smaller addition for now, matching `nalgebra`'s convention for direct
+element access. A row/column view type remains a possible post-MVP addition if chained indexing
+turns out to be worth that cost.
 
 Core matrix operations: addition, subtraction, scaling, matrix-matrix multiplication,
 matrix-vector multiplication, transpose, determinant (1×1, 2×2, and 3×3 only for MVP — see
@@ -189,17 +197,17 @@ them at all.
 Two genuinely runtime-fallible cases remain, handled differently depending on whether the
 failure is a programmer logic error or genuinely external/untrusted data:
 
-- **Indexing with a runtime-computed index:** `Vector<N>` offers both a checked and an unchecked
-  path, mirroring `slice::get` vs. `slice[i]` in Rust's standard library. `.get()` returns
-  `Option<&T>` for callers that want to handle an out-of-range index gracefully. `Index`/
-  `IndexMut` (`vector[i]`, `vector[i] = ...`) panic instead, for callers — like the naive tier's
-  own `from_fn`-based operations — that already know by construction the index is always valid
-  and don't want `Option`-unwrapping boilerplate for a case that can't actually happen. Both
+- **Indexing with a runtime-computed index:** both `Vector<N>` and `Matrix<M, N>` offer a checked
+  and an unchecked path, mirroring `slice::get` vs. `slice[i]` in Rust's standard library. `.get()`
+  returns `Option<&T>` for callers that want to handle an out-of-range index gracefully. `Index`/
+  `IndexMut` (`vector[i]`, `matrix[(row, col)]`) panic instead, for callers — like the naive
+  tier's own `from_fn`-based operations — that already know by construction the index is always
+  valid and don't want `Option`-unwrapping boilerplate for a case that can't actually happen. Both
   `index`/`index_mut` are marked `#[track_caller]` so a genuine out-of-bounds panic reports the
-  caller's line, not the line inside the trait impl. Since a `Vector<N>`'s length is a
-  compile-time constant, an out-of-range index almost always reflects a bug in the calling code,
-  not untrusted external input — there's only one possible failure reason, so no additional error
-  context is needed for either path.
+  caller's line, not the line inside the trait impl. Since a `Vector<N>`/`Matrix<M, N>`'s
+  dimensions are compile-time constants, an out-of-range index almost always reflects a bug in the
+  calling code, not untrusted external input — there's only one possible failure reason, so no
+  additional error context is needed for either path.
 - **Constructing a fixed-size vector/matrix from runtime-length external data** (e.g. NumPy
   subprocess output, `proptest`-generated inputs, eventually real user input): returns `Result`,
   via a `TryFrom` implementation, carrying a descriptive error (e.g. expected vs. actual length).
