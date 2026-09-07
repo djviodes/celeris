@@ -47,7 +47,7 @@ Source is organized by tier first, type second, rather than by type first:
 ```
 src/
   lib.rs            # wiring only — mod declarations, pub use re-exports, crate doc comment
-  vector.rs         # Vector<N> type definition: fields, From/TryFrom, .get(), .len(), etc.
+  vector.rs         # Vector<N> type definition: fields, From/TryFrom, .get(), Index/IndexMut, .len(), etc.
   matrix.rs         # Matrix type definition (post-MVP)
   naive/
     mod.rs
@@ -189,11 +189,17 @@ them at all.
 Two genuinely runtime-fallible cases remain, handled differently depending on whether the
 failure is a programmer logic error or genuinely external/untrusted data:
 
-- **Indexing with a runtime-computed index:** returns `Option<&T>` (matching `slice::get`'s
-  convention in Rust's standard library). Since a `Vector<N>`'s length is a compile-time
-  constant, an out-of-range index almost always reflects a bug in the calling code, not
-  untrusted external input — there's only one possible failure reason, so no additional error
-  context is needed.
+- **Indexing with a runtime-computed index:** `Vector<N>` offers both a checked and an unchecked
+  path, mirroring `slice::get` vs. `slice[i]` in Rust's standard library. `.get()` returns
+  `Option<&T>` for callers that want to handle an out-of-range index gracefully. `Index`/
+  `IndexMut` (`vector[i]`, `vector[i] = ...`) panic instead, for callers — like the naive tier's
+  own `from_fn`-based operations — that already know by construction the index is always valid
+  and don't want `Option`-unwrapping boilerplate for a case that can't actually happen. Both
+  `index`/`index_mut` are marked `#[track_caller]` so a genuine out-of-bounds panic reports the
+  caller's line, not the line inside the trait impl. Since a `Vector<N>`'s length is a
+  compile-time constant, an out-of-range index almost always reflects a bug in the calling code,
+  not untrusted external input — there's only one possible failure reason, so no additional error
+  context is needed for either path.
 - **Constructing a fixed-size vector/matrix from runtime-length external data** (e.g. NumPy
   subprocess output, `proptest`-generated inputs, eventually real user input): returns `Result`,
   via a `TryFrom` implementation, carrying a descriptive error (e.g. expected vs. actual length).
