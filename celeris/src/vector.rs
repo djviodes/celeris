@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::fmt;
+use std::ops::{Index, IndexMut};
 
 #[repr(C, align(32))]
 #[derive(Debug)]
@@ -43,6 +44,22 @@ impl<const N: usize> TryFrom<&[f64]> for Vector<N> {
             expected: N,
         })?;
         Ok(Self { elements })
+    }
+}
+
+impl<const N: usize> Index<usize> for Vector<N> {
+    type Output = f64;
+
+    #[track_caller]
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.elements[index]
+    }
+}
+
+impl<const N: usize> IndexMut<usize> for Vector<N> {
+    #[track_caller]
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.elements[index]
     }
 }
 

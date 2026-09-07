@@ -153,41 +153,11 @@ mod tests {
 
         let summed_vector: Vector<5> = Vector::add(&addend_1, &addend_2);
 
-        assert_relative_eq!(
-            *summed_vector
-                .get(0)
-                .expect("hardcoded index is always in bounds"),
-            2.0,
-            epsilon = 1e-2
-        );
-        assert_relative_eq!(
-            *summed_vector
-                .get(1)
-                .expect("hardcoded index is always in bounds"),
-            4.0,
-            epsilon = 1e-2
-        );
-        assert_relative_eq!(
-            *summed_vector
-                .get(2)
-                .expect("hardcoded index is always in bounds"),
-            6.0,
-            epsilon = 1e-2
-        );
-        assert_relative_eq!(
-            *summed_vector
-                .get(3)
-                .expect("hardcoded index is always in bounds"),
-            8.0,
-            epsilon = 1e-2
-        );
-        assert_relative_eq!(
-            *summed_vector
-                .get(4)
-                .expect("hardcoded index is always in bounds"),
-            10.0,
-            epsilon = 1e-2
-        );
+        assert_relative_eq!(summed_vector[0], 2.0, epsilon = 1e-2);
+        assert_relative_eq!(summed_vector[1], 4.0, epsilon = 1e-2);
+        assert_relative_eq!(summed_vector[2], 6.0, epsilon = 1e-2);
+        assert_relative_eq!(summed_vector[3], 8.0, epsilon = 1e-2);
+        assert_relative_eq!(summed_vector[4], 10.0, epsilon = 1e-2);
     }
 
     #[test]
@@ -197,41 +167,11 @@ mod tests {
 
         let summed_vector: Vector<5> = Vector::add(&addend_1, &addend_2);
 
-        assert_relative_eq!(
-            *summed_vector
-                .get(0)
-                .expect("hardcoded index is always in bounds"),
-            2e-12,
-            epsilon = 1e-12
-        );
-        assert_relative_eq!(
-            *summed_vector
-                .get(1)
-                .expect("hardcoded index is always in bounds"),
-            4e-12,
-            epsilon = 1e-12
-        );
-        assert_relative_eq!(
-            *summed_vector
-                .get(2)
-                .expect("hardcoded index is always in bounds"),
-            6e-12,
-            epsilon = 1e-12
-        );
-        assert_relative_eq!(
-            *summed_vector
-                .get(3)
-                .expect("hardcoded index is always in bounds"),
-            8e-12,
-            epsilon = 1e-12
-        );
-        assert_relative_eq!(
-            *summed_vector
-                .get(4)
-                .expect("hardcoded index is always in bounds"),
-            1e-11,
-            epsilon = 1e-12
-        );
+        assert_relative_eq!(summed_vector[0], 2e-12, epsilon = 1e-12);
+        assert_relative_eq!(summed_vector[1], 4e-12, epsilon = 1e-12);
+        assert_relative_eq!(summed_vector[2], 6e-12, epsilon = 1e-12);
+        assert_relative_eq!(summed_vector[3], 8e-12, epsilon = 1e-12);
+        assert_relative_eq!(summed_vector[4], 1e-11, epsilon = 1e-12);
     }
 
     #[test]
@@ -254,41 +194,31 @@ mod tests {
         let summed_vector: Vector<5> = Vector::add(&addend_1, &addend_2);
 
         assert_relative_eq!(
-            *summed_vector
-                .get(0)
-                .expect("hardcoded index is always in bounds"),
+            summed_vector[0],
             2.000_000_000_000_002_5e14,
             epsilon = 2.0,
             max_relative = 1e-13
         );
         assert_relative_eq!(
-            *summed_vector
-                .get(1)
-                .expect("hardcoded index is always in bounds"),
+            summed_vector[1],
             4.000_000_000_000_004_4e14,
             epsilon = 2.0,
             max_relative = 1e-13
         );
         assert_relative_eq!(
-            *summed_vector
-                .get(2)
-                .expect("hardcoded index is always in bounds"),
+            summed_vector[2],
             6.000_000_000_000_008e14,
             epsilon = 2.0,
             max_relative = 1e-13
         );
         assert_relative_eq!(
-            *summed_vector
-                .get(3)
-                .expect("hardcoded index is always in bounds"),
+            summed_vector[3],
             8.000_000_000_000_009e14,
             epsilon = 2.0,
             max_relative = 1e-13
         );
         assert_relative_eq!(
-            *summed_vector
-                .get(4)
-                .expect("hardcoded index is always in bounds"),
+            summed_vector[4],
             1.000_000_000_000_001_1e15,
             epsilon = 2.0,
             max_relative = 1e-13
@@ -302,41 +232,11 @@ mod tests {
 
         let difference_vector: Vector<5> = Vector::subtract(&minuend, &subtrahend);
 
-        assert_relative_eq!(
-            *difference_vector
-                .get(0)
-                .expect("hardcoded index is always in bounds"),
-            0.5,
-            epsilon = 1e-2
-        );
-        assert_relative_eq!(
-            *difference_vector
-                .get(1)
-                .expect("hardcoded index is always in bounds"),
-            1.2,
-            epsilon = 1e-2
-        );
-        assert_relative_eq!(
-            *difference_vector
-                .get(2)
-                .expect("hardcoded index is always in bounds"),
-            2.0,
-            epsilon = 1e-2
-        );
-        assert_relative_eq!(
-            *difference_vector
-                .get(3)
-                .expect("hardcoded index is always in bounds"),
-            2.8,
-            epsilon = 1e-2
-        );
-        assert_relative_eq!(
-            *difference_vector
-                .get(4)
-                .expect("hardcoded index is always in bounds"),
-            3.5,
-            epsilon = 1e-2
-        );
+        assert_relative_eq!(difference_vector[0], 0.5, epsilon = 1e-2);
+        assert_relative_eq!(difference_vector[1], 1.2, epsilon = 1e-2);
+        assert_relative_eq!(difference_vector[2], 2.0, epsilon = 1e-2);
+        assert_relative_eq!(difference_vector[3], 2.8, epsilon = 1e-2);
+        assert_relative_eq!(difference_vector[4], 3.5, epsilon = 1e-2);
     }
 
     #[test]
@@ -346,41 +246,11 @@ mod tests {
 
         let difference_vector: Vector<5> = Vector::subtract(&minuend, &subtrahend);
 
-        assert_relative_eq!(
-            *difference_vector
-                .get(0)
-                .expect("hardcoded index is always in bounds"),
-            5e-12,
-            epsilon = 1e-12
-        );
-        assert_relative_eq!(
-            *difference_vector
-                .get(1)
-                .expect("hardcoded index is always in bounds"),
-            1.5e-11,
-            epsilon = 1e-12
-        );
-        assert_relative_eq!(
-            *difference_vector
-                .get(2)
-                .expect("hardcoded index is always in bounds"),
-            2.5e-11,
-            epsilon = 1e-12
-        );
-        assert_relative_eq!(
-            *difference_vector
-                .get(3)
-                .expect("hardcoded index is always in bounds"),
-            3.5e-11,
-            epsilon = 1e-12
-        );
-        assert_relative_eq!(
-            *difference_vector
-                .get(4)
-                .expect("hardcoded index is always in bounds"),
-            4.5e-11,
-            epsilon = 1e-12
-        );
+        assert_relative_eq!(difference_vector[0], 5e-12, epsilon = 1e-12);
+        assert_relative_eq!(difference_vector[1], 1.5e-11, epsilon = 1e-12);
+        assert_relative_eq!(difference_vector[2], 2.5e-11, epsilon = 1e-12);
+        assert_relative_eq!(difference_vector[3], 3.5e-11, epsilon = 1e-12);
+        assert_relative_eq!(difference_vector[4], 4.5e-11, epsilon = 1e-12);
     }
 
     #[test]
@@ -397,41 +267,31 @@ mod tests {
         let difference_vector: Vector<5> = Vector::subtract(&minuend, &subtrahend);
 
         assert_relative_eq!(
-            *difference_vector
-                .get(0)
-                .expect("hardcoded index is always in bounds"),
+            difference_vector[0],
             5.000_000_000_000_001_3e13,
             epsilon = 1.0,
             max_relative = 1e-13
         );
         assert_relative_eq!(
-            *difference_vector
-                .get(1)
-                .expect("hardcoded index is always in bounds"),
+            difference_vector[1],
             1.500_000_000_000_002_2e14,
             epsilon = 1.0,
             max_relative = 1e-13
         );
         assert_relative_eq!(
-            *difference_vector
-                .get(2)
-                .expect("hardcoded index is always in bounds"),
+            difference_vector[2],
             2.500_000_000_000_004e14,
             epsilon = 1.0,
             max_relative = 1e-13
         );
         assert_relative_eq!(
-            *difference_vector
-                .get(3)
-                .expect("hardcoded index is always in bounds"),
+            difference_vector[3],
             3.500_000_000_000_004_4e14,
             epsilon = 1.0,
             max_relative = 1e-13
         );
         assert_relative_eq!(
-            *difference_vector
-                .get(4)
-                .expect("hardcoded index is always in bounds"),
+            difference_vector[4],
             4.500_000_000_000_005_6e14,
             epsilon = 1.0,
             max_relative = 1e-13
@@ -445,41 +305,11 @@ mod tests {
 
         let scaled_vector: Vector<5> = Vector::scale(scalar, &vector);
 
-        assert_relative_eq!(
-            *scaled_vector
-                .get(0)
-                .expect("hardcoded index is always in bounds"),
-            2.0,
-            epsilon = 1e-2
-        );
-        assert_relative_eq!(
-            *scaled_vector
-                .get(1)
-                .expect("hardcoded index is always in bounds"),
-            4.0,
-            epsilon = 1e-2
-        );
-        assert_relative_eq!(
-            *scaled_vector
-                .get(2)
-                .expect("hardcoded index is always in bounds"),
-            6.0,
-            epsilon = 1e-2
-        );
-        assert_relative_eq!(
-            *scaled_vector
-                .get(3)
-                .expect("hardcoded index is always in bounds"),
-            8.0,
-            epsilon = 1e-2
-        );
-        assert_relative_eq!(
-            *scaled_vector
-                .get(4)
-                .expect("hardcoded index is always in bounds"),
-            10.0,
-            epsilon = 1e-2
-        );
+        assert_relative_eq!(scaled_vector[0], 2.0, epsilon = 1e-2);
+        assert_relative_eq!(scaled_vector[1], 4.0, epsilon = 1e-2);
+        assert_relative_eq!(scaled_vector[2], 6.0, epsilon = 1e-2);
+        assert_relative_eq!(scaled_vector[3], 8.0, epsilon = 1e-2);
+        assert_relative_eq!(scaled_vector[4], 10.0, epsilon = 1e-2);
     }
 
     #[test]
@@ -489,41 +319,11 @@ mod tests {
 
         let scaled_vector: Vector<5> = Vector::scale(scalar, &vector);
 
-        assert_relative_eq!(
-            *scaled_vector
-                .get(0)
-                .expect("hardcoded index is always in bounds"),
-            2e-12,
-            epsilon = 1e-12
-        );
-        assert_relative_eq!(
-            *scaled_vector
-                .get(1)
-                .expect("hardcoded index is always in bounds"),
-            4e-12,
-            epsilon = 1e-12
-        );
-        assert_relative_eq!(
-            *scaled_vector
-                .get(2)
-                .expect("hardcoded index is always in bounds"),
-            6e-12,
-            epsilon = 1e-12
-        );
-        assert_relative_eq!(
-            *scaled_vector
-                .get(3)
-                .expect("hardcoded index is always in bounds"),
-            8e-12,
-            epsilon = 1e-12
-        );
-        assert_relative_eq!(
-            *scaled_vector
-                .get(4)
-                .expect("hardcoded index is always in bounds"),
-            1e-11,
-            epsilon = 1e-12
-        );
+        assert_relative_eq!(scaled_vector[0], 2e-12, epsilon = 1e-12);
+        assert_relative_eq!(scaled_vector[1], 4e-12, epsilon = 1e-12);
+        assert_relative_eq!(scaled_vector[2], 6e-12, epsilon = 1e-12);
+        assert_relative_eq!(scaled_vector[3], 8e-12, epsilon = 1e-12);
+        assert_relative_eq!(scaled_vector[4], 1e-11, epsilon = 1e-12);
     }
 
     #[test]
@@ -540,41 +340,31 @@ mod tests {
         let scaled_vector: Vector<5> = Vector::scale(scalar, &vector);
 
         assert_relative_eq!(
-            *scaled_vector
-                .get(0)
-                .expect("hardcoded index is always in bounds"),
+            scaled_vector[0],
             2.000_000_000_000_002_6e14,
             epsilon = 1.0,
             max_relative = 1e-15
         );
         assert_relative_eq!(
-            *scaled_vector
-                .get(1)
-                .expect("hardcoded index is always in bounds"),
+            scaled_vector[1],
             4.000_000_000_000_004_4e14,
             epsilon = 1.0,
             max_relative = 1e-15
         );
         assert_relative_eq!(
-            *scaled_vector
-                .get(2)
-                .expect("hardcoded index is always in bounds"),
+            scaled_vector[2],
             6.000_000_000_000_008e14,
             epsilon = 1.0,
             max_relative = 1e-15
         );
         assert_relative_eq!(
-            *scaled_vector
-                .get(3)
-                .expect("hardcoded index is always in bounds"),
+            scaled_vector[3],
             8.000_000_000_000_009e14,
             epsilon = 1.0,
             max_relative = 1e-15
         );
         assert_relative_eq!(
-            *scaled_vector
-                .get(4)
-                .expect("hardcoded index is always in bounds"),
+            scaled_vector[4],
             9.000_000_000_000_006e14,
             epsilon = 1.0,
             max_relative = 1e-15
