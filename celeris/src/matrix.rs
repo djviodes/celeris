@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::fmt;
+use std::ops::{Index, IndexMut};
 
 #[repr(C, align(32))]
 pub struct Matrix<const M: usize, const N: usize> {
@@ -72,6 +73,24 @@ impl<const M: usize, const N: usize> TryFrom<&[&[f64]]> for Matrix<M, N> {
             elements[i] = element;
         }
         Ok(Self { elements })
+    }
+}
+
+impl<const M: usize, const N: usize> Index<(usize, usize)> for Matrix<M, N> {
+    type Output = f64;
+
+    #[track_caller]
+    fn index(&self, index: (usize, usize)) -> &Self::Output {
+        let (row, col) = index;
+        &self.elements[col][row]
+    }
+}
+
+impl<const M: usize, const N: usize> IndexMut<(usize, usize)> for Matrix<M, N> {
+    #[track_caller]
+    fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
+        let (row, col) = index;
+        &mut self.elements[col][row]
     }
 }
 
