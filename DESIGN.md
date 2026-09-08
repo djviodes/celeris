@@ -475,6 +475,16 @@ future, which is a separate, larger question from naming and not yet decided.
 - **Heuristic/adaptive CPU-GPU dispatch:** benchmark a GPU implementation against the SIMD CPU
   core to empirically find the input-size crossover point where GPU execution wins despite data
   transfer overhead, then route operations to whichever backend is faster based on that data.
+  **CUDA is the first GPU backend targeted**, decided ahead of the rest of this list's usual
+  research-then-decide order because the deciding factors here are personal/career, not
+  technical: David's own build is NVIDIA hardware, CUDA experience is directly relevant to the
+  kind of jobs he's targeting, and NVIDIA's industry prevalence makes it the highest-value first
+  target regardless of which GPU backend would be "more correct" architecturally. A
+  vendor-neutral backend (`wgpu`, Vulkan compute) remains a possible later addition — mirroring
+  how CPU instruction sets are handled as separate dispatchable tiers — once CUDA is working, not
+  instead of it. Not yet researched: `cudarc` vs. `cust` for the Rust/CUDA binding, and how the
+  existing CPU-dispatch-chain design generalizes (or doesn't) to a tier with real host/device
+  memory transfer cost, unlike switching between CPU instruction sets.
 - **`f32` support** alongside `f64`, including benchmarking the precision/speed tradeoff between them.
 - **Multi-threading (Rayon)** layered on top of SIMD, parallelizing across cores in addition to
   within them.
