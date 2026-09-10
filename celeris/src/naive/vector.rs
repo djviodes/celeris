@@ -514,4 +514,51 @@ mod tests {
             max_relative = 1e-13
         );
     }
+
+    #[test]
+    fn manhattan_norming_normal_vectors_should_return_success() {
+        let vector: Vector<5> = Vector::from([1.0, 2.0, 3.0, 4.0, 5.0]);
+
+        let manhattan_norm: f64 = Vector::manhattan_norm(&vector);
+
+        assert_relative_eq!(manhattan_norm, 15.0, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn manhattan_norming_negative_vectors_should_return_success() {
+        let vector: Vector<5> = Vector::from([-1.0, 2.0, -3.0, 4.0, -5.0]);
+
+        let manhattan_norm: f64 = Vector::manhattan_norm(&vector);
+
+        assert_relative_eq!(manhattan_norm, 15.0, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn manhattan_norming_small_vectors_should_return_success() {
+        let vector: Vector<5> = Vector::from([1e-12, 2e-12, 3e-12, 4e-12, 5e-12]);
+
+        let manhattan_norm: f64 = Vector::manhattan_norm(&vector);
+
+        assert_relative_eq!(manhattan_norm, 1.5e-11, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn manhattan_norming_large_vectors_should_return_success() {
+        let vector: Vector<5> = Vector::from([
+            1.000_000_000_000_001_3e14,
+            2.000_000_000_000_002_2e14,
+            3.000_000_000_000_004e14,
+            4.000_000_000_000_004_4e14,
+            5.000_000_000_000_005_6e14,
+        ]);
+
+        let manhattan_norm: f64 = Vector::manhattan_norm(&vector);
+
+        assert_relative_eq!(
+            manhattan_norm,
+            1.500_000_000_000_001_8e15,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+    }
 }
