@@ -153,11 +153,11 @@ mod tests {
 
         let summed_vector: Vector<5> = Vector::add(&addend_1, &addend_2);
 
-        assert_relative_eq!(summed_vector[0], 2.0, epsilon = 1e-2);
-        assert_relative_eq!(summed_vector[1], 4.0, epsilon = 1e-2);
-        assert_relative_eq!(summed_vector[2], 6.0, epsilon = 1e-2);
-        assert_relative_eq!(summed_vector[3], 8.0, epsilon = 1e-2);
-        assert_relative_eq!(summed_vector[4], 10.0, epsilon = 1e-2);
+        assert_relative_eq!(summed_vector[0], 2.0, epsilon = 1e-14);
+        assert_relative_eq!(summed_vector[1], 4.0, epsilon = 1e-14);
+        assert_relative_eq!(summed_vector[2], 6.0, epsilon = 1e-14);
+        assert_relative_eq!(summed_vector[3], 8.0, epsilon = 1e-14);
+        assert_relative_eq!(summed_vector[4], 10.0, epsilon = 1e-14);
     }
 
     #[test]
@@ -167,11 +167,11 @@ mod tests {
 
         let summed_vector: Vector<5> = Vector::add(&addend_1, &addend_2);
 
-        assert_relative_eq!(summed_vector[0], 2e-12, epsilon = 1e-12);
-        assert_relative_eq!(summed_vector[1], 4e-12, epsilon = 1e-12);
-        assert_relative_eq!(summed_vector[2], 6e-12, epsilon = 1e-12);
-        assert_relative_eq!(summed_vector[3], 8e-12, epsilon = 1e-12);
-        assert_relative_eq!(summed_vector[4], 1e-11, epsilon = 1e-12);
+        assert_relative_eq!(summed_vector[0], 2e-12, epsilon = 1e-14);
+        assert_relative_eq!(summed_vector[1], 4e-12, epsilon = 1e-14);
+        assert_relative_eq!(summed_vector[2], 6e-12, epsilon = 1e-14);
+        assert_relative_eq!(summed_vector[3], 8e-12, epsilon = 1e-14);
+        assert_relative_eq!(summed_vector[4], 1e-11, epsilon = 1e-14);
     }
 
     #[test]
@@ -196,31 +196,31 @@ mod tests {
         assert_relative_eq!(
             summed_vector[0],
             2.000_000_000_000_002_5e14,
-            epsilon = 2.0,
+            epsilon = 1e-14,
             max_relative = 1e-13
         );
         assert_relative_eq!(
             summed_vector[1],
             4.000_000_000_000_004_4e14,
-            epsilon = 2.0,
+            epsilon = 1e-14,
             max_relative = 1e-13
         );
         assert_relative_eq!(
             summed_vector[2],
             6.000_000_000_000_008e14,
-            epsilon = 2.0,
+            epsilon = 1e-14,
             max_relative = 1e-13
         );
         assert_relative_eq!(
             summed_vector[3],
             8.000_000_000_000_009e14,
-            epsilon = 2.0,
+            epsilon = 1e-14,
             max_relative = 1e-13
         );
         assert_relative_eq!(
             summed_vector[4],
             1.000_000_000_000_001_1e15,
-            epsilon = 2.0,
+            epsilon = 1e-14,
             max_relative = 1e-13
         );
     }
@@ -232,11 +232,11 @@ mod tests {
 
         let difference_vector: Vector<5> = Vector::subtract(&minuend, &subtrahend);
 
-        assert_relative_eq!(difference_vector[0], 0.5, epsilon = 1e-2);
-        assert_relative_eq!(difference_vector[1], 1.2, epsilon = 1e-2);
-        assert_relative_eq!(difference_vector[2], 2.0, epsilon = 1e-2);
-        assert_relative_eq!(difference_vector[3], 2.8, epsilon = 1e-2);
-        assert_relative_eq!(difference_vector[4], 3.5, epsilon = 1e-2);
+        assert_relative_eq!(difference_vector[0], 0.5, epsilon = 1e-14);
+        assert_relative_eq!(difference_vector[1], 1.2, epsilon = 1e-14);
+        assert_relative_eq!(difference_vector[2], 2.0, epsilon = 1e-14);
+        assert_relative_eq!(difference_vector[3], 2.8, epsilon = 1e-14);
+        assert_relative_eq!(difference_vector[4], 3.5, epsilon = 1e-14);
     }
 
     #[test]
@@ -246,11 +246,11 @@ mod tests {
 
         let difference_vector: Vector<5> = Vector::subtract(&minuend, &subtrahend);
 
-        assert_relative_eq!(difference_vector[0], 5e-12, epsilon = 1e-12);
-        assert_relative_eq!(difference_vector[1], 1.5e-11, epsilon = 1e-12);
-        assert_relative_eq!(difference_vector[2], 2.5e-11, epsilon = 1e-12);
-        assert_relative_eq!(difference_vector[3], 3.5e-11, epsilon = 1e-12);
-        assert_relative_eq!(difference_vector[4], 4.5e-11, epsilon = 1e-12);
+        assert_relative_eq!(difference_vector[0], 5e-12, epsilon = 1e-14);
+        assert_relative_eq!(difference_vector[1], 1.5e-11, epsilon = 1e-14);
+        assert_relative_eq!(difference_vector[2], 2.5e-11, epsilon = 1e-14);
+        assert_relative_eq!(difference_vector[3], 3.5e-11, epsilon = 1e-14);
+        assert_relative_eq!(difference_vector[4], 4.5e-11, epsilon = 1e-14);
     }
 
     #[test]
@@ -269,31 +269,31 @@ mod tests {
         assert_relative_eq!(
             difference_vector[0],
             5.000_000_000_000_001_3e13,
-            epsilon = 1.0,
+            epsilon = 1e-14,
             max_relative = 1e-13
         );
         assert_relative_eq!(
             difference_vector[1],
             1.500_000_000_000_002_2e14,
-            epsilon = 1.0,
+            epsilon = 1e-14,
             max_relative = 1e-13
         );
         assert_relative_eq!(
             difference_vector[2],
             2.500_000_000_000_004e14,
-            epsilon = 1.0,
+            epsilon = 1e-14,
             max_relative = 1e-13
         );
         assert_relative_eq!(
             difference_vector[3],
             3.500_000_000_000_004_4e14,
-            epsilon = 1.0,
+            epsilon = 1e-14,
             max_relative = 1e-13
         );
         assert_relative_eq!(
             difference_vector[4],
             4.500_000_000_000_005_6e14,
-            epsilon = 1.0,
+            epsilon = 1e-14,
             max_relative = 1e-13
         );
     }
@@ -305,11 +305,11 @@ mod tests {
 
         let scaled_vector: Vector<5> = Vector::scale(scalar, &vector);
 
-        assert_relative_eq!(scaled_vector[0], 2.0, epsilon = 1e-2);
-        assert_relative_eq!(scaled_vector[1], 4.0, epsilon = 1e-2);
-        assert_relative_eq!(scaled_vector[2], 6.0, epsilon = 1e-2);
-        assert_relative_eq!(scaled_vector[3], 8.0, epsilon = 1e-2);
-        assert_relative_eq!(scaled_vector[4], 10.0, epsilon = 1e-2);
+        assert_relative_eq!(scaled_vector[0], 2.0, epsilon = 1e-14);
+        assert_relative_eq!(scaled_vector[1], 4.0, epsilon = 1e-14);
+        assert_relative_eq!(scaled_vector[2], 6.0, epsilon = 1e-14);
+        assert_relative_eq!(scaled_vector[3], 8.0, epsilon = 1e-14);
+        assert_relative_eq!(scaled_vector[4], 10.0, epsilon = 1e-14);
     }
 
     #[test]
@@ -319,11 +319,11 @@ mod tests {
 
         let scaled_vector: Vector<5> = Vector::scale(scalar, &vector);
 
-        assert_relative_eq!(scaled_vector[0], 2e-12, epsilon = 1e-12);
-        assert_relative_eq!(scaled_vector[1], 4e-12, epsilon = 1e-12);
-        assert_relative_eq!(scaled_vector[2], 6e-12, epsilon = 1e-12);
-        assert_relative_eq!(scaled_vector[3], 8e-12, epsilon = 1e-12);
-        assert_relative_eq!(scaled_vector[4], 1e-11, epsilon = 1e-12);
+        assert_relative_eq!(scaled_vector[0], 2e-12, epsilon = 1e-14);
+        assert_relative_eq!(scaled_vector[1], 4e-12, epsilon = 1e-14);
+        assert_relative_eq!(scaled_vector[2], 6e-12, epsilon = 1e-14);
+        assert_relative_eq!(scaled_vector[3], 8e-12, epsilon = 1e-14);
+        assert_relative_eq!(scaled_vector[4], 1e-11, epsilon = 1e-14);
     }
 
     #[test]
@@ -342,32 +342,79 @@ mod tests {
         assert_relative_eq!(
             scaled_vector[0],
             2.000_000_000_000_002_6e14,
-            epsilon = 1.0,
-            max_relative = 1e-15
+            epsilon = 1e-14,
+            max_relative = 1e-13
         );
         assert_relative_eq!(
             scaled_vector[1],
             4.000_000_000_000_004_4e14,
-            epsilon = 1.0,
-            max_relative = 1e-15
+            epsilon = 1e-14,
+            max_relative = 1e-13
         );
         assert_relative_eq!(
             scaled_vector[2],
             6.000_000_000_000_008e14,
-            epsilon = 1.0,
-            max_relative = 1e-15
+            epsilon = 1e-14,
+            max_relative = 1e-13
         );
         assert_relative_eq!(
             scaled_vector[3],
             8.000_000_000_000_009e14,
-            epsilon = 1.0,
-            max_relative = 1e-15
+            epsilon = 1e-14,
+            max_relative = 1e-13
         );
         assert_relative_eq!(
             scaled_vector[4],
             9.000_000_000_000_006e14,
-            epsilon = 1.0,
-            max_relative = 1e-15
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+    }
+
+    #[test]
+    fn dotting_normal_number_vectors_should_return_success() {
+        let vector_1: Vector<5> = Vector::from([1.0, 2.0, 3.0, 4.0, 5.0]);
+        let vector_2: Vector<5> = Vector::from([1.0, 2.0, 3.0, 4.0, 5.0]);
+
+        let dotted_value: f64 = Vector::dot(&vector_1, &vector_2);
+
+        assert_relative_eq!(dotted_value, 55.0, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn dotting_small_number_vectors_should_return_success() {
+        let vector_1: Vector<5> = Vector::from([1e-6, 2e-6, 3e-6, 4e-6, 5e-6]);
+        let vector_2: Vector<5> = Vector::from([1e-6, 2e-6, 3e-6, 4e-6, 5e-6]);
+
+        let dotted_value: f64 = Vector::dot(&vector_1, &vector_2);
+
+        assert_relative_eq!(dotted_value, 5.5e-11, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn dotting_large_number_vectors_should_return_success() {
+        let vector_1: Vector<5> = Vector::from([
+            1_000_001.3,
+            2_000_002.9,
+            3_000_004.1,
+            4_000_004.4,
+            5_000_003.6,
+        ]);
+        let vector_2: Vector<5> = Vector::from([
+            1_000_001.7,
+            2_000_002.1,
+            3_000_004.8,
+            4_000_004.5,
+            5_000_003.6,
+        ]);
+
+        let dotted_value: f64 = Vector::dot(&vector_1, &vector_2);
+
+        assert_relative_eq!(
+            dotted_value,
+            55_000_111_300_060.74,
+            epsilon = 1e-14,
+            max_relative = 1e-13
         );
     }
 }
