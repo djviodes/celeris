@@ -476,4 +476,42 @@ mod tests {
             max_relative = 1e-13
         );
     }
+
+    #[test]
+    fn euclidean_norming_normal_vectors_should_return_success() {
+        let vector: Vector<5> = Vector::from([1.0, 2.0, 3.0, 4.0, 5.0]);
+
+        let euclidean_norm: f64 = Vector::euclidean_norm(&vector);
+
+        assert_relative_eq!(euclidean_norm, f64::sqrt(55.0), epsilon = 1e-14);
+    }
+
+    #[test]
+    fn euclidean_norming_small_vectors_should_return_success() {
+        let vector: Vector<5> = Vector::from([1e-6, 2e-6, 3e-6, 4e-6, 5e-6]);
+
+        let euclidean_norm: f64 = Vector::euclidean_norm(&vector);
+
+        assert_relative_eq!(euclidean_norm, f64::sqrt(5.5e-11), epsilon = 1e-14);
+    }
+
+    #[test]
+    fn euclidean_norming_large_vectors_should_return_success() {
+        let vector: Vector<5> = Vector::from([
+            1_000_001.3,
+            2_000_002.9,
+            3_000_004.1,
+            4_000_004.4,
+            5_000_003.6,
+        ]);
+
+        let euclidean_norm: f64 = Vector::euclidean_norm(&vector);
+
+        assert_relative_eq!(
+            euclidean_norm,
+            f64::sqrt(5.500_011_000_005_923e13),
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+    }
 }
