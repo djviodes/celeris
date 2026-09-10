@@ -417,4 +417,63 @@ mod tests {
             max_relative = 1e-13
         );
     }
+
+    #[test]
+    fn outer_multiply_normal_vectors_should_return_success() {
+        let column_vector: Vector<2> = Vector::from([1.0, 2.0]);
+        let row_vector: Vector<2> = Vector::from([1.0, 2.0]);
+
+        let outer_matrix: Matrix<2, 2> = Vector::outer(&column_vector, &row_vector);
+
+        assert_relative_eq!(outer_matrix[(0, 0)], 1.0, epsilon = 1e-14);
+        assert_relative_eq!(outer_matrix[(0, 1)], 2.0, epsilon = 1e-14);
+        assert_relative_eq!(outer_matrix[(1, 0)], 2.0, epsilon = 1e-14);
+        assert_relative_eq!(outer_matrix[(1, 1)], 4.0, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn outer_multiply_small_vectors_should_return_success() {
+        let column_vector: Vector<2> = Vector::from([1e-7, 2e-7]);
+        let row_vector: Vector<2> = Vector::from([1e-7, 2e-7]);
+
+        let outer_matrix: Matrix<2, 2> = Vector::outer(&column_vector, &row_vector);
+
+        assert_relative_eq!(outer_matrix[(0, 0)], 1e-14, epsilon = 1e-14);
+        assert_relative_eq!(outer_matrix[(0, 1)], 2e-14, epsilon = 1e-14);
+        assert_relative_eq!(outer_matrix[(1, 0)], 2e-14, epsilon = 1e-14);
+        assert_relative_eq!(outer_matrix[(1, 1)], 4e-14, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn outer_multiply_large_vectors_should_return_success() {
+        let column_vector: Vector<2> = Vector::from([1.000_001_7e6, 2.000_002_9e6]);
+        let row_vector: Vector<2> = Vector::from([1.000_001_7e6, 2.000_002_9e6]);
+
+        let outer_matrix: Matrix<2, 2> = Vector::outer(&column_vector, &row_vector);
+
+        assert_relative_eq!(
+            outer_matrix[(0, 0)],
+            1.000_003_400_002_889_9e12,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+        assert_relative_eq!(
+            outer_matrix[(0, 1)],
+            2.000_006_300_004_93e12,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+        assert_relative_eq!(
+            outer_matrix[(1, 0)],
+            2.000_006_300_004_93e12,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+        assert_relative_eq!(
+            outer_matrix[(1, 1)],
+            4.000_011_600_008_41e12,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+    }
 }
