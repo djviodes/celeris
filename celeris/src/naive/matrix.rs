@@ -270,3 +270,49 @@ impl Matrix<3, 3> {
         a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::MatrixError;
+    use approx::assert_relative_eq;
+    use assert_matches::assert_matches;
+
+    use super::*;
+
+    #[test]
+    fn initializing_normal_matrix_should_return_success() {
+        let matrix: Matrix<2, 2> = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+
+        assert_eq!(matrix.len(), 4);
+        assert_eq!(matrix.nrows(), 2);
+        assert_eq!(matrix.ncols(), 2);
+    }
+
+    #[test]
+    fn initializing_illegal_rows_matrix_should_return_error() {
+        let matrix: MatrixError =
+            Matrix::<2, 2>::try_from(&[&[1.0][..], &[3.0, 4.0][..]][..]).unwrap_err();
+
+        assert_matches!(
+            matrix,
+            MatrixError::InvalidRowLength {
+                rows_received: 1,
+                rows_expected: 2
+            }
+        );
+    }
+
+    #[test]
+    fn initializing_illegal_columns_matrix_should_return_error() {
+        let matrix: MatrixError =
+            Matrix::<2, 2>::try_from(&[&[1.0, 2.0][..]][..]).unwrap_err();
+
+        assert_matches!(
+            matrix,
+            MatrixError::InvalidColumnLength {
+                columns_received: 1,
+                columns_expected: 2
+            }
+        );
+    }
+}

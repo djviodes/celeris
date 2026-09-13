@@ -3,6 +3,7 @@ use std::fmt;
 use std::ops::{Index, IndexMut};
 
 #[repr(C, align(32))]
+#[derive(Debug)]
 pub struct Matrix<const M: usize, const N: usize> {
     elements: [[f64; M]; N],
 }
@@ -98,5 +99,30 @@ impl<const M: usize, const N: usize> Matrix<M, N> {
     #[must_use]
     pub fn get(&self, row: usize, column: usize) -> Option<&f64> {
         (row < M && column < N).then(|| &self.elements[column][row])
+    }
+
+    #[must_use]
+    pub fn nrows(&self) -> usize {
+        M
+    }
+
+    #[must_use]
+    pub fn ncols(&self) -> usize {
+        N
+    }
+
+    #[must_use]
+    pub fn shape(&self) -> (usize, usize) {
+        (M, N)
+    }
+
+    #[must_use]
+    pub fn len(&self) -> usize {
+        M * N
+    }
+
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        M == 0 && N == 0
     }
 }
