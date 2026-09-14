@@ -444,4 +444,66 @@ mod tests {
             max_relative = 1e-13
         );
     }
+
+    #[test]
+    fn scaling_normal_number_matrices_should_return_success() {
+        let scalar: f64 = 2.0;
+        let matrix: Matrix<2, 2> = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+
+        let scaled_matrix: Matrix<2, 2> = Matrix::scale(scalar, &matrix);
+
+        assert_relative_eq!(scaled_matrix[(0, 0)], 2.0, epsilon = 1e-14);
+        assert_relative_eq!(scaled_matrix[(1, 0)], 4.0, epsilon = 1e-14);
+        assert_relative_eq!(scaled_matrix[(0, 1)], 6.0, epsilon = 1e-14);
+        assert_relative_eq!(scaled_matrix[(1, 1)], 8.0, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn scaling_small_number_matrices_should_return_success() {
+        let scalar: f64 = 2.0;
+        let matrix: Matrix<2, 2> = Matrix::from([[1e-13, 2e-13], [3e-13, 4e-13]]);
+
+        let scaled_matrix: Matrix<2, 2> = Matrix::scale(scalar, &matrix);
+
+        assert_relative_eq!(scaled_matrix[(0, 0)], 2e-13, epsilon = 1e-14);
+        assert_relative_eq!(scaled_matrix[(1, 0)], 4e-13, epsilon = 1e-14);
+        assert_relative_eq!(scaled_matrix[(0, 1)], 6e-13, epsilon = 1e-14);
+        assert_relative_eq!(scaled_matrix[(1, 1)], 8e-13, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn scaling_large_number_matrices_should_return_success() {
+        let scalar: f64 = 2.0;
+        let matrix: Matrix<2, 2> = Matrix::from([
+            [1.000_000_000_000_002e14, 2.000_000_000_000_005e14],
+            [3.000_000_000_000_003e14, 3.500_000_000_000_007e14],
+        ]);
+
+        let scaled_matrix: Matrix<2, 2> = Matrix::scale(scalar, &matrix);
+
+        assert_relative_eq!(
+            scaled_matrix[(0, 0)],
+            2.000_000_000_000_004e14,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+        assert_relative_eq!(
+            scaled_matrix[(1, 0)],
+            4.000_000_000_000_01e14,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+        assert_relative_eq!(
+            scaled_matrix[(0, 1)],
+            6.000_000_000_000_006e14,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+        assert_relative_eq!(
+            scaled_matrix[(1, 1)],
+            7.000_000_000_000_014e14,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+    }
 }
