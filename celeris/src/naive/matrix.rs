@@ -304,8 +304,7 @@ mod tests {
 
     #[test]
     fn initializing_illegal_columns_matrix_should_return_error() {
-        let matrix: MatrixError =
-            Matrix::<2, 2>::try_from(&[&[1.0, 2.0][..]][..]).unwrap_err();
+        let matrix: MatrixError = Matrix::<2, 2>::try_from(&[&[1.0, 2.0][..]][..]).unwrap_err();
 
         assert_matches!(
             matrix,
@@ -313,6 +312,71 @@ mod tests {
                 columns_received: 1,
                 columns_expected: 2
             }
+        );
+    }
+
+    #[test]
+    fn adding_normal_number_matrices_should_return_success() {
+        let addend_1: Matrix<2, 2> = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+        let addend_2: Matrix<2, 2> = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+
+        let summed_matrix: Matrix<2, 2> = Matrix::add(&addend_1, &addend_2);
+
+        assert_relative_eq!(summed_matrix[(0, 0)], 2.0, epsilon = 1e-14);
+        assert_relative_eq!(summed_matrix[(1, 0)], 4.0, epsilon = 1e-14);
+        assert_relative_eq!(summed_matrix[(0, 1)], 6.0, epsilon = 1e-14);
+        assert_relative_eq!(summed_matrix[(1, 1)], 8.0, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn adding_small_number_matrices_should_return_success() {
+        let addend_1: Matrix<2, 2> = Matrix::from([[1e-12, 2e-12], [3e-12, 4e-12]]);
+        let addend_2: Matrix<2, 2> = Matrix::from([[1e-12, 2e-12], [3e-12, 4e-12]]);
+
+        let summed_matrix: Matrix<2, 2> = Matrix::add(&addend_1, &addend_2);
+
+        assert_relative_eq!(summed_matrix[(0, 0)], 2e-12, epsilon = 1e-14);
+        assert_relative_eq!(summed_matrix[(1, 0)], 4e-12, epsilon = 1e-14);
+        assert_relative_eq!(summed_matrix[(0, 1)], 6e-12, epsilon = 1e-14);
+        assert_relative_eq!(summed_matrix[(1, 1)], 8e-12, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn adding_large_number_matrices_should_return_success() {
+        let addend_1: Matrix<2, 2> = Matrix::from([
+            [1.000_000_000_000_001_3e14, 2.000_000_000_000_002_2e14],
+            [3.000_000_000_000_004e14, 4.000_000_000_000_004_4e14],
+        ]);
+        let addend_2: Matrix<2, 2> = Matrix::from([
+            [2.000_000_000_000_003e14, 4.000_000_000_000_001e14],
+            [3.000_000_000_000_001e14, 1.000_000_000_000_007_5e14],
+        ]);
+
+        let summed_matrix: Matrix<2, 2> = Matrix::add(&addend_1, &addend_2);
+
+        assert_relative_eq!(
+            summed_matrix[(0, 0)],
+            3.000_000_000_000_004_4e14,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+        assert_relative_eq!(
+            summed_matrix[(1, 0)],
+            6.000_000_000_000_004e14,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+        assert_relative_eq!(
+            summed_matrix[(0, 1)],
+            6.000_000_000_000_005e14,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+        assert_relative_eq!(
+            summed_matrix[(1, 1)],
+            5.000_000_000_000_012e14,
+            epsilon = 1e-14,
+            max_relative = 1e-13
         );
     }
 }
