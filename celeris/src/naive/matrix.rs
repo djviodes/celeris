@@ -379,4 +379,69 @@ mod tests {
             max_relative = 1e-13
         );
     }
+
+    #[test]
+    fn subtracting_normal_number_matrices_should_return_success() {
+        let minuend: Matrix<2, 2> = Matrix::from([[5.0, 6.0], [7.0, 8.0]]);
+        let subtrahend: Matrix<2, 2> = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+
+        let difference_matrix: Matrix<2, 2> = Matrix::subtract(&minuend, &subtrahend);
+
+        assert_relative_eq!(difference_matrix[(0, 0)], 4.0, epsilon = 1e-14);
+        assert_relative_eq!(difference_matrix[(1, 0)], 4.0, epsilon = 1e-14);
+        assert_relative_eq!(difference_matrix[(0, 1)], 4.0, epsilon = 1e-14);
+        assert_relative_eq!(difference_matrix[(1, 1)], 4.0, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn subtracting_small_number_matrices_should_return_success() {
+        let minuend: Matrix<2, 2> = Matrix::from([[5e-13, 6e-13], [7e-13, 8e-13]]);
+        let subtrahend: Matrix<2, 2> = Matrix::from([[1e-13, 2e-13], [3e-13, 4e-13]]);
+
+        let difference_matrix: Matrix<2, 2> = Matrix::subtract(&minuend, &subtrahend);
+
+        assert_relative_eq!(difference_matrix[(0, 0)], 4e-13, epsilon = 1e-14);
+        assert_relative_eq!(difference_matrix[(1, 0)], 4e-13, epsilon = 1e-14);
+        assert_relative_eq!(difference_matrix[(0, 1)], 4e-13, epsilon = 1e-14);
+        assert_relative_eq!(difference_matrix[(1, 1)], 4e-13, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn subtracting_large_number_matrices_should_return_success() {
+        let minuend: Matrix<2, 2> = Matrix::from([
+            [5.000_000_000_000_009e14, 6.000_000_000_000_002e14],
+            [7.000_000_000_000_006e14, 8.000_000_000_000_009e14],
+        ]);
+        let subtrahend: Matrix<2, 2> = Matrix::from([
+            [1.000_000_000_000_003e14, 2.000_000_000_000_001e14],
+            [3.000_000_000_000_004e14, 4.000_000_000_000_003e14],
+        ]);
+
+        let difference_matrix: Matrix<2, 2> = Matrix::subtract(&minuend, &subtrahend);
+
+        assert_relative_eq!(
+            difference_matrix[(0, 0)],
+            4.000_000_000_000_006e14,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+        assert_relative_eq!(
+            difference_matrix[(1, 0)],
+            4.000_000_000_000_001e14,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+        assert_relative_eq!(
+            difference_matrix[(0, 1)],
+            4.000_000_000_000_002e14,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+        assert_relative_eq!(
+            difference_matrix[(1, 1)],
+            4.000_000_000_000_006e14,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+    }
 }
