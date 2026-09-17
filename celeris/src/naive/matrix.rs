@@ -568,4 +568,66 @@ mod tests {
             max_relative = 1e-13
         );
     }
+
+    #[test]
+    fn multiply_normal_number_matrix_vector_should_return_success() {
+        let matrix: Matrix<3, 2> = Matrix::from([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]);
+        let vector: Vector<2> = Vector::from([2.0, 2.0]);
+
+        let multiplied_vector: Vector<3> = Matrix::matrix_vector_multiplication(&matrix, &vector);
+
+        assert_relative_eq!(multiplied_vector[0], 10.0, epsilon = 1e-14);
+        assert_relative_eq!(multiplied_vector[1], 14.0, epsilon = 1e-14);
+        assert_relative_eq!(multiplied_vector[2], 18.0, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn multiply_small_number_matrix_vector_should_return_success() {
+        let matrix: Matrix<3, 2> = Matrix::from([[1e-13, 2e-13, 3e-13], [4e-13, 5e-13, 6e-13]]);
+        let vector: Vector<2> = Vector::from([2.0, 2.0]);
+
+        let multiplied_vector: Vector<3> = Matrix::matrix_vector_multiplication(&matrix, &vector);
+
+        assert_relative_eq!(multiplied_vector[0], 1e-12, epsilon = 1e-14);
+        assert_relative_eq!(multiplied_vector[1], 1.4e-12, epsilon = 1e-14);
+        assert_relative_eq!(multiplied_vector[2], 1.8e-12, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn multiply_large_number_matrix_vector_should_return_success() {
+        let matrix: Matrix<3, 2> = Matrix::from([
+            [
+                1.000_000_000_000_01e13,
+                2.000_000_000_000_04e13,
+                3.000_000_000_000_03e13,
+            ],
+            [
+                4.000_000_000_000_08e13,
+                5.000_000_000_000_01e13,
+                6.000_000_000_000_09e13,
+            ],
+        ]);
+        let vector: Vector<2> = Vector::from([2.0, 2.0]);
+
+        let multiplied_vector: Vector<3> = Matrix::matrix_vector_multiplication(&matrix, &vector);
+
+        assert_relative_eq!(
+            multiplied_vector[0],
+            1.000_000_000_000_018e14,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+        assert_relative_eq!(
+            multiplied_vector[1],
+            1.400_000_000_000_01e14,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+        assert_relative_eq!(
+            multiplied_vector[2],
+            1.800_000_000_000_024e14,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+    }
 }
