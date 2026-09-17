@@ -630,4 +630,18 @@ mod tests {
             max_relative = 1e-13
         );
     }
+
+    #[test]
+    fn transposing_a_matrix_should_return_success() {
+        let matrix: Matrix<3, 2> = Matrix::from([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]);
+
+        let transposed_matrix: Matrix<2, 3> = Matrix::transpose(&matrix);
+
+        assert_relative_eq!(transposed_matrix[(0, 0)], 1.0);
+        assert_relative_eq!(transposed_matrix[(0, 1)], 2.0);
+        assert_relative_eq!(transposed_matrix[(0, 2)], 3.0);
+        assert_relative_eq!(transposed_matrix[(1, 0)], 4.0);
+        assert_relative_eq!(transposed_matrix[(1, 1)], 5.0);
+        assert_relative_eq!(transposed_matrix[(1, 2)], 6.0);
+    }
 }
