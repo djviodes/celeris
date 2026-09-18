@@ -644,4 +644,37 @@ mod tests {
         assert_relative_eq!(transposed_matrix[(1, 1)], 5.0);
         assert_relative_eq!(transposed_matrix[(1, 2)], 6.0);
     }
+
+    #[test]
+    fn frobenius_norming_a_normal_number_matrix_should_return_success() {
+        let matrix: Matrix<2, 2> = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+
+        let frobenius_normed_value: f64 = Matrix::frobenius_norm(&matrix);
+
+        assert_relative_eq!(frobenius_normed_value, 30.0_f64.sqrt(), epsilon = 1e-14);
+    }
+
+    #[test]
+    fn frobenius_norming_a_small_number_matrix_should_return_success() {
+        let matrix: Matrix<2, 2> = Matrix::from([[1e-6, 2e-6], [3e-6, 4e-6]]);
+
+        let frobenius_normed_value: f64 = Matrix::frobenius_norm(&matrix);
+
+        assert_relative_eq!(frobenius_normed_value, 3e-11_f64.sqrt(), epsilon = 1e-14);
+    }
+
+    #[test]
+    fn frobenius_norming_a_large_number_matrix_should_return_success() {
+        let matrix: Matrix<2, 2> =
+            Matrix::from([[1.000_001e5, 2.000_006e5], [3.000_007e5, 4.000_002e5]]);
+
+        let frobenius_normed_value: f64 = Matrix::frobenius_norm(&matrix);
+
+        assert_relative_eq!(
+            frobenius_normed_value,
+            3.000_008_400_009e11_f64.sqrt(),
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+    }
 }
