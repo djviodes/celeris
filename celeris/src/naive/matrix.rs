@@ -677,4 +677,39 @@ mod tests {
             max_relative = 1e-13
         );
     }
+
+    #[test]
+    fn one_norming_a_normal_number_matrix_should_return_success() {
+        let matrix: Matrix<2, 2> = Matrix::from([[1.0, -2.0], [0.0, 4.0]]);
+
+        let one_normed_value: f64 = Matrix::one_norm(&matrix);
+
+        assert_relative_eq!(one_normed_value, 4.0, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn one_norming_a_small_number_matrix_should_return_success() {
+        let matrix: Matrix<2, 2> = Matrix::from([[1e-13, 2e-13], [1e-13, 0.0]]);
+
+        let one_normed_value: f64 = Matrix::one_norm(&matrix);
+
+        assert_relative_eq!(one_normed_value, 3e-13, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn one_norming_a_large_number_matrix_should_return_success() {
+        let matrix: Matrix<2, 2> = Matrix::from([
+            [1.000_000_000_000_07e13, 2.000_000_000_000_03e13],
+            [3.000_000_000_000_04e13, 4.000_000_000_000_15e13],
+        ]);
+
+        let one_normed_value: f64 = Matrix::one_norm(&matrix);
+
+        assert_relative_eq!(
+            one_normed_value,
+            7.000_000_000_000_19e13,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+    }
 }
