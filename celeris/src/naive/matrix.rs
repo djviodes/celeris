@@ -712,4 +712,39 @@ mod tests {
             max_relative = 1e-13
         );
     }
+
+    #[test]
+    fn infinity_norming_a_normal_number_matrix_should_return_success() {
+        let matrix: Matrix<2, 2> = Matrix::from([[1.0, 2.0], [3.0, -4.0]]);
+
+        let infinity_normed_value: f64 = Matrix::infinity_norm(&matrix);
+
+        assert_relative_eq!(infinity_normed_value, 6.0, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn infinity_norming_a_small_number_matrix_should_return_success() {
+        let matrix: Matrix<2, 2> = Matrix::from([[1e-13, 0.0], [6e-13, 8e-13]]);
+
+        let infinity_normed_value: f64 = Matrix::infinity_norm(&matrix);
+
+        assert_relative_eq!(infinity_normed_value, 8e-13, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn infinity_norming_a_large_number_matrix_should_return_success() {
+        let matrix: Matrix<2, 2> = Matrix::from([
+            [1.000_000_000_000_09e13, 2.000_000_000_000_02e13],
+            [5.000_000_000_000_11e13, 1.000_000_000_000_04e13],
+        ]);
+
+        let infinity_normed_value: f64 = Matrix::infinity_norm(&matrix);
+
+        assert_relative_eq!(
+            infinity_normed_value,
+            6.000_000_000_000_20e13,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+    }
 }
