@@ -747,4 +747,48 @@ mod tests {
             max_relative = 1e-13
         );
     }
+
+    #[test]
+    fn one_by_one_determinant_should_return_success() {
+        let matrix: Matrix<1, 1> = Matrix::from([[1.0]]);
+
+        let determinant: f64 = Matrix::determinant_one_by_one(&matrix);
+
+        assert_relative_eq!(determinant, 1.0, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn normal_number_two_by_two_determinant_should_return_success() {
+        let matrix: Matrix<2, 2> = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+
+        let determinant: f64 = Matrix::determinant_two_by_two(&matrix);
+
+        assert_relative_eq!(determinant, -2.0, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn small_number_two_by_two_determinant_should_return_success() {
+        let matrix: Matrix<2, 2> = Matrix::from([[1e-6, 2e-6], [3e-6, 4e-6]]);
+
+        let determinant: f64 = Matrix::determinant_two_by_two(&matrix);
+
+        assert_relative_eq!(determinant, -2e-12, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn large_number_two_by_two_determinant_should_return_success() {
+        let matrix: Matrix<2, 2> = Matrix::from([
+            [1.000_000_07e7, 2.000_000_03e7],
+            [3.000_000_04e7, 4.000_000_09e7],
+        ]);
+
+        let determinant: f64 = Matrix::determinant_two_by_two(&matrix);
+
+        assert_relative_eq!(
+            determinant,
+            -1.999_999_799_999_995e14,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+    }
 }
