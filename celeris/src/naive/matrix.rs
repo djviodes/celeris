@@ -791,4 +791,42 @@ mod tests {
             max_relative = 1e-13
         );
     }
+
+    #[test]
+    fn normal_number_three_by_three_determinant_should_return_success() {
+        let matrix: Matrix<3, 3> =
+            Matrix::from([[1.0, 4.0, 7.0], [2.0, 5.0, 8.0], [3.0, 6.0, 9.0]]);
+
+        let determinant: f64 = Matrix::determinant_three_by_three(&matrix);
+
+        assert_relative_eq!(determinant, 0.0, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn small_number_three_by_three_determinant_should_return_success() {
+        let matrix: Matrix<3, 3> =
+            Matrix::from([[1e-7, 0.0, 0.0], [0.0, 1e-3, 0.0], [0.0, 0.0, 1e-4]]);
+
+        let determinant: f64 = Matrix::determinant_three_by_three(&matrix);
+
+        assert_relative_eq!(determinant, 1e-14, epsilon = 1e-14);
+    }
+
+    #[test]
+    fn large_number_three_by_three_determinant_should_return_success() {
+        let matrix: Matrix<3, 3> = Matrix::from([
+            [1.000_000_01e7, 0.0, 0.0],
+            [0.0, 1.000_4e3, 0.0],
+            [0.0, 0.0, 1.000_07e4],
+        ]);
+
+        let determinant: f64 = Matrix::determinant_three_by_three(&matrix);
+
+        assert_relative_eq!(
+            determinant,
+            1.000_470_038_004_70e14,
+            epsilon = 1e-14,
+            max_relative = 1e-13
+        );
+    }
 }
