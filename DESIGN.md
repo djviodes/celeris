@@ -56,7 +56,7 @@ src/
   simd/
     mod.rs
     vector.rs       # safe SIMD Vector<N> operations, built on primitives.rs
-    matrix.rs       # safe SIMD Matrix operations (post-MVP)
+    matrix.rs       # safe SIMD Matrix operations
     primitives.rs   # raw unsafe AVX2 intrinsic wrappers, shared across vector/matrix
 ```
 
