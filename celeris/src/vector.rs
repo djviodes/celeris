@@ -78,4 +78,14 @@ impl<const N: usize> Vector<N> {
     pub fn is_empty(&self) -> bool {
         N == 0
     }
+
+    #[must_use]
+    pub(crate) fn as_ptr(&self) -> *const f64 {
+        self.elements.as_ptr()
+    }
+
+    #[must_use]
+    pub(crate) fn as_mut_ptr(&mut self) -> *mut f64 {
+        self.elements.as_mut_ptr()
+    }
 }
