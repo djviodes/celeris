@@ -4,6 +4,7 @@
 
 mod matrix;
 pub mod naive;
+pub mod simd;
 mod vector;
 
 pub use matrix::{Matrix, MatrixError};

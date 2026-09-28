@@ -2,117 +2,115 @@ use crate::Matrix;
 use crate::Vector;
 use std::array::from_fn;
 
-impl<const N: usize> Vector<N> {
-    /// # Panics
-    ///
-    /// `add` cannot panic because `from_fn`'s contract guarantees the index is valid
-    #[must_use]
-    pub fn add(addend_1: &Vector<N>, addend_2: &Vector<N>) -> Vector<N> {
-        let array: [f64; N] = from_fn(|i| {
-            addend_1
+/// # Panics
+///
+/// `add` cannot panic because `from_fn`'s contract guarantees the index is valid
+#[must_use]
+pub fn add<const N: usize>(addend_1: &Vector<N>, addend_2: &Vector<N>) -> Vector<N> {
+    let array: [f64; N] = from_fn(|i| {
+        addend_1
+            .get(i)
+            .expect("index from from_fn is always in bounds")
+            + addend_2
                 .get(i)
                 .expect("index from from_fn is always in bounds")
-                + addend_2
-                    .get(i)
-                    .expect("index from from_fn is always in bounds")
-        });
+    });
 
-        Vector::from(array)
-    }
+    Vector::from(array)
+}
 
-    /// # Panics
-    ///
-    /// `subtract` cannot panic because `from_fn`'s contract guarantees the index is valid
-    #[must_use]
-    pub fn subtract(minuend: &Vector<N>, subtrahend: &Vector<N>) -> Vector<N> {
-        let array: [f64; N] = from_fn(|i| {
-            minuend
+/// # Panics
+///
+/// `subtract` cannot panic because `from_fn`'s contract guarantees the index is valid
+#[must_use]
+pub fn subtract<const N: usize>(minuend: &Vector<N>, subtrahend: &Vector<N>) -> Vector<N> {
+    let array: [f64; N] = from_fn(|i| {
+        minuend
+            .get(i)
+            .expect("index from from_fn is always in bounds")
+            - subtrahend
                 .get(i)
                 .expect("index from from_fn is always in bounds")
-                - subtrahend
-                    .get(i)
-                    .expect("index from from_fn is always in bounds")
-        });
+    });
 
-        Vector::from(array)
-    }
+    Vector::from(array)
+}
 
-    /// # Panics
-    ///
-    /// `scale` cannot panic because `from_fn`'s contract guarantees the index is valid
-    #[must_use]
-    pub fn scale(scalar: f64, vector: &Vector<N>) -> Vector<N> {
-        let array: [f64; N] = from_fn(|i| {
-            vector
+/// # Panics
+///
+/// `scale` cannot panic because `from_fn`'s contract guarantees the index is valid
+#[must_use]
+pub fn scale<const N: usize>(scalar: f64, vector: &Vector<N>) -> Vector<N> {
+    let array: [f64; N] = from_fn(|i| {
+        vector
+            .get(i)
+            .expect("index from from_fn is always in bounds")
+            * scalar
+    });
+
+    Vector::from(array)
+}
+
+/// # Panics
+///
+/// `dot` cannot panic because the `map` iterator only iterates between 0 and N - 1 elements
+/// which is always the size of the parameter vectors
+#[must_use]
+pub fn dot<const N: usize>(vector_1: &Vector<N>, vector_2: &Vector<N>) -> f64 {
+    (0..N)
+        .map(|i| {
+            vector_1
                 .get(i)
-                .expect("index from from_fn is always in bounds")
-                * scalar
-        });
-
-        Vector::from(array)
-    }
-
-    /// # Panics
-    ///
-    /// `dot` cannot panic because the `map` iterator only iterates between 0 and N - 1 elements
-    /// which is always the size of the parameter vectors
-    #[must_use]
-    pub fn dot(vector_1: &Vector<N>, vector_2: &Vector<N>) -> f64 {
-        (0..N)
-            .map(|i| {
-                vector_1
+                .expect("index from the map iterator is always in bounds")
+                * vector_2
                     .get(i)
                     .expect("index from the map iterator is always in bounds")
-                    * vector_2
-                        .get(i)
-                        .expect("index from the map iterator is always in bounds")
-            })
-            .sum()
-    }
+        })
+        .sum()
+}
 
-    /// # Panics
-    ///
-    /// `outer` cannot panic because `from_fn`'s contract guarantees the index is valid
-    #[must_use]
-    pub fn outer<const M: usize>(
-        column_vector: &Vector<M>,
-        row_vector: &Vector<N>,
-    ) -> Matrix<M, N> {
-        let matrix: [[f64; M]; N] = from_fn(|column| {
-            from_fn(|row| {
-                column_vector
-                    .get(row)
+/// # Panics
+///
+/// `outer` cannot panic because `from_fn`'s contract guarantees the index is valid
+#[must_use]
+pub fn outer<const N: usize, const M: usize>(
+    column_vector: &Vector<M>,
+    row_vector: &Vector<N>,
+) -> Matrix<M, N> {
+    let matrix: [[f64; M]; N] = from_fn(|column| {
+        from_fn(|row| {
+            column_vector
+                .get(row)
+                .expect("index from from_fn is always in bounds")
+                * row_vector
+                    .get(column)
                     .expect("index from from_fn is always in bounds")
-                    * row_vector
-                        .get(column)
-                        .expect("index from from_fn is always in bounds")
-            })
-        });
+        })
+    });
 
-        Matrix::from(matrix)
-    }
+    Matrix::from(matrix)
+}
 
-    #[must_use]
-    pub fn euclidean_norm(vector: &Vector<N>) -> f64 {
-        f64::sqrt(Vector::dot(vector, vector))
-    }
+#[must_use]
+pub fn euclidean_norm<const N: usize>(vector: &Vector<N>) -> f64 {
+    f64::sqrt(dot(vector, vector))
+}
 
-    /// # Panics
-    ///
-    /// `manhattan_norm` cannot panic because the `map` iterator only iterates between 0 and
-    /// N - 1 elements which is always the size of the parameter vectors
-    #[must_use]
-    pub fn manhattan_norm(vector: &Vector<N>) -> f64 {
-        (0..N)
-            .map(|i| {
-                f64::abs(
-                    *vector
-                        .get(i)
-                        .expect("index from the map iterator is always in bounds"),
-                )
-            })
-            .sum()
-    }
+/// # Panics
+///
+/// `manhattan_norm` cannot panic because the `map` iterator only iterates between 0 and
+/// N - 1 elements which is always the size of the parameter vectors
+#[must_use]
+pub fn manhattan_norm<const N: usize>(vector: &Vector<N>) -> f64 {
+    (0..N)
+        .map(|i| {
+            f64::abs(
+                *vector
+                    .get(i)
+                    .expect("index from the map iterator is always in bounds"),
+            )
+        })
+        .sum()
 }
 
 #[cfg(test)]
@@ -151,7 +149,7 @@ mod tests {
         let addend_1: Vector<5> = Vector::from([1.0, 2.0, 3.0, 4.0, 5.0]);
         let addend_2: Vector<5> = Vector::from([1.0, 2.0, 3.0, 4.0, 5.0]);
 
-        let summed_vector: Vector<5> = Vector::add(&addend_1, &addend_2);
+        let summed_vector: Vector<5> = add(&addend_1, &addend_2);
 
         assert_relative_eq!(summed_vector[0], 2.0, epsilon = 1e-14);
         assert_relative_eq!(summed_vector[1], 4.0, epsilon = 1e-14);
@@ -165,7 +163,7 @@ mod tests {
         let addend_1: Vector<5> = Vector::from([1e-12, 2e-12, 3e-12, 4e-12, 5e-12]);
         let addend_2: Vector<5> = Vector::from([1e-12, 2e-12, 3e-12, 4e-12, 5e-12]);
 
-        let summed_vector: Vector<5> = Vector::add(&addend_1, &addend_2);
+        let summed_vector: Vector<5> = add(&addend_1, &addend_2);
 
         assert_relative_eq!(summed_vector[0], 2e-12, epsilon = 1e-14);
         assert_relative_eq!(summed_vector[1], 4e-12, epsilon = 1e-14);
@@ -191,7 +189,7 @@ mod tests {
             5.000_000_000_000_005_6e14,
         ]);
 
-        let summed_vector: Vector<5> = Vector::add(&addend_1, &addend_2);
+        let summed_vector: Vector<5> = add(&addend_1, &addend_2);
 
         assert_relative_eq!(
             summed_vector[0],
@@ -230,7 +228,7 @@ mod tests {
         let minuend: Vector<5> = Vector::from([1.0, 2.0, 3.0, 4.0, 5.0]);
         let subtrahend: Vector<5> = Vector::from([0.5, 0.8, 1.0, 1.2, 1.5]);
 
-        let difference_vector: Vector<5> = Vector::subtract(&minuend, &subtrahend);
+        let difference_vector: Vector<5> = subtract(&minuend, &subtrahend);
 
         assert_relative_eq!(difference_vector[0], 0.5, epsilon = 1e-14);
         assert_relative_eq!(difference_vector[1], 1.2, epsilon = 1e-14);
@@ -244,7 +242,7 @@ mod tests {
         let minuend: Vector<5> = Vector::from([1e-11, 2e-11, 3e-11, 4e-11, 5e-11]);
         let subtrahend: Vector<5> = Vector::from([5e-12, 5e-12, 5e-12, 5e-12, 5e-12]);
 
-        let difference_vector: Vector<5> = Vector::subtract(&minuend, &subtrahend);
+        let difference_vector: Vector<5> = subtract(&minuend, &subtrahend);
 
         assert_relative_eq!(difference_vector[0], 5e-12, epsilon = 1e-14);
         assert_relative_eq!(difference_vector[1], 1.5e-11, epsilon = 1e-14);
@@ -264,7 +262,7 @@ mod tests {
         ]);
         let subtrahend: Vector<5> = Vector::from([5e13, 5e13, 5e13, 5e13, 5e13]);
 
-        let difference_vector: Vector<5> = Vector::subtract(&minuend, &subtrahend);
+        let difference_vector: Vector<5> = subtract(&minuend, &subtrahend);
 
         assert_relative_eq!(
             difference_vector[0],
@@ -303,7 +301,7 @@ mod tests {
         let scalar: f64 = 2.0;
         let vector: Vector<5> = Vector::from([1.0, 2.0, 3.0, 4.0, 5.0]);
 
-        let scaled_vector: Vector<5> = Vector::scale(scalar, &vector);
+        let scaled_vector: Vector<5> = scale(scalar, &vector);
 
         assert_relative_eq!(scaled_vector[0], 2.0, epsilon = 1e-14);
         assert_relative_eq!(scaled_vector[1], 4.0, epsilon = 1e-14);
@@ -317,7 +315,7 @@ mod tests {
         let scalar: f64 = 2.0;
         let vector: Vector<5> = Vector::from([1e-12, 2e-12, 3e-12, 4e-12, 5e-12]);
 
-        let scaled_vector: Vector<5> = Vector::scale(scalar, &vector);
+        let scaled_vector: Vector<5> = scale(scalar, &vector);
 
         assert_relative_eq!(scaled_vector[0], 2e-12, epsilon = 1e-14);
         assert_relative_eq!(scaled_vector[1], 4e-12, epsilon = 1e-14);
@@ -337,7 +335,7 @@ mod tests {
             4.500_000_000_000_003e14,
         ]);
 
-        let scaled_vector: Vector<5> = Vector::scale(scalar, &vector);
+        let scaled_vector: Vector<5> = scale(scalar, &vector);
 
         assert_relative_eq!(
             scaled_vector[0],
@@ -376,7 +374,7 @@ mod tests {
         let vector_1: Vector<5> = Vector::from([1.0, 2.0, 3.0, 4.0, 5.0]);
         let vector_2: Vector<5> = Vector::from([1.0, 2.0, 3.0, 4.0, 5.0]);
 
-        let dotted_value: f64 = Vector::dot(&vector_1, &vector_2);
+        let dotted_value: f64 = dot(&vector_1, &vector_2);
 
         assert_relative_eq!(dotted_value, 55.0, epsilon = 1e-14);
     }
@@ -386,7 +384,7 @@ mod tests {
         let vector_1: Vector<5> = Vector::from([1e-6, 2e-6, 3e-6, 4e-6, 5e-6]);
         let vector_2: Vector<5> = Vector::from([1e-6, 2e-6, 3e-6, 4e-6, 5e-6]);
 
-        let dotted_value: f64 = Vector::dot(&vector_1, &vector_2);
+        let dotted_value: f64 = dot(&vector_1, &vector_2);
 
         assert_relative_eq!(dotted_value, 5.5e-11, epsilon = 1e-14);
     }
@@ -408,7 +406,7 @@ mod tests {
             5_000_003.6,
         ]);
 
-        let dotted_value: f64 = Vector::dot(&vector_1, &vector_2);
+        let dotted_value: f64 = dot(&vector_1, &vector_2);
 
         assert_relative_eq!(
             dotted_value,
@@ -423,7 +421,7 @@ mod tests {
         let column_vector: Vector<2> = Vector::from([1.0, 2.0]);
         let row_vector: Vector<2> = Vector::from([1.0, 2.0]);
 
-        let outer_matrix: Matrix<2, 2> = Vector::outer(&column_vector, &row_vector);
+        let outer_matrix: Matrix<2, 2> = outer(&column_vector, &row_vector);
 
         assert_relative_eq!(outer_matrix[(0, 0)], 1.0, epsilon = 1e-14);
         assert_relative_eq!(outer_matrix[(0, 1)], 2.0, epsilon = 1e-14);
@@ -436,7 +434,7 @@ mod tests {
         let column_vector: Vector<2> = Vector::from([1e-7, 2e-7]);
         let row_vector: Vector<2> = Vector::from([1e-7, 2e-7]);
 
-        let outer_matrix: Matrix<2, 2> = Vector::outer(&column_vector, &row_vector);
+        let outer_matrix: Matrix<2, 2> = outer(&column_vector, &row_vector);
 
         assert_relative_eq!(outer_matrix[(0, 0)], 1e-14, epsilon = 1e-14);
         assert_relative_eq!(outer_matrix[(0, 1)], 2e-14, epsilon = 1e-14);
@@ -449,7 +447,7 @@ mod tests {
         let column_vector: Vector<2> = Vector::from([1.000_001_7e6, 2.000_002_9e6]);
         let row_vector: Vector<2> = Vector::from([1.000_001_7e6, 2.000_002_9e6]);
 
-        let outer_matrix: Matrix<2, 2> = Vector::outer(&column_vector, &row_vector);
+        let outer_matrix: Matrix<2, 2> = outer(&column_vector, &row_vector);
 
         assert_relative_eq!(
             outer_matrix[(0, 0)],
@@ -481,7 +479,7 @@ mod tests {
     fn euclidean_norming_normal_vectors_should_return_success() {
         let vector: Vector<5> = Vector::from([1.0, 2.0, 3.0, 4.0, 5.0]);
 
-        let euclidean_norm: f64 = Vector::euclidean_norm(&vector);
+        let euclidean_norm: f64 = euclidean_norm(&vector);
 
         assert_relative_eq!(euclidean_norm, f64::sqrt(55.0), epsilon = 1e-14);
     }
@@ -490,7 +488,7 @@ mod tests {
     fn euclidean_norming_small_vectors_should_return_success() {
         let vector: Vector<5> = Vector::from([1e-6, 2e-6, 3e-6, 4e-6, 5e-6]);
 
-        let euclidean_norm: f64 = Vector::euclidean_norm(&vector);
+        let euclidean_norm: f64 = euclidean_norm(&vector);
 
         assert_relative_eq!(euclidean_norm, f64::sqrt(5.5e-11), epsilon = 1e-14);
     }
@@ -505,7 +503,7 @@ mod tests {
             5_000_003.6,
         ]);
 
-        let euclidean_norm: f64 = Vector::euclidean_norm(&vector);
+        let euclidean_norm: f64 = euclidean_norm(&vector);
 
         assert_relative_eq!(
             euclidean_norm,
@@ -519,7 +517,7 @@ mod tests {
     fn manhattan_norming_normal_vectors_should_return_success() {
         let vector: Vector<5> = Vector::from([1.0, 2.0, 3.0, 4.0, 5.0]);
 
-        let manhattan_norm: f64 = Vector::manhattan_norm(&vector);
+        let manhattan_norm: f64 = manhattan_norm(&vector);
 
         assert_relative_eq!(manhattan_norm, 15.0, epsilon = 1e-14);
     }
@@ -528,7 +526,7 @@ mod tests {
     fn manhattan_norming_negative_vectors_should_return_success() {
         let vector: Vector<5> = Vector::from([-1.0, 2.0, -3.0, 4.0, -5.0]);
 
-        let manhattan_norm: f64 = Vector::manhattan_norm(&vector);
+        let manhattan_norm: f64 = manhattan_norm(&vector);
 
         assert_relative_eq!(manhattan_norm, 15.0, epsilon = 1e-14);
     }
@@ -537,7 +535,7 @@ mod tests {
     fn manhattan_norming_small_vectors_should_return_success() {
         let vector: Vector<5> = Vector::from([1e-12, 2e-12, 3e-12, 4e-12, 5e-12]);
 
-        let manhattan_norm: f64 = Vector::manhattan_norm(&vector);
+        let manhattan_norm: f64 = manhattan_norm(&vector);
 
         assert_relative_eq!(manhattan_norm, 1.5e-11, epsilon = 1e-14);
     }
@@ -552,7 +550,7 @@ mod tests {
             5.000_000_000_000_005_6e14,
         ]);
 
-        let manhattan_norm: f64 = Vector::manhattan_norm(&vector);
+        let manhattan_norm: f64 = manhattan_norm(&vector);
 
         assert_relative_eq!(
             manhattan_norm,
