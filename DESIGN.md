@@ -12,6 +12,12 @@ work (SIMD, CPU architecture, benchmarking methodology) grounded in linear algeb
 It is also intended to serve as the numerical core for a separate, planned physics simulation
 platform, which shapes some operation-scope decisions below (e.g. cross product).
 
+Beyond the first milestone, the project is organized as nine layers — dense and sparse linear
+algebra, CPU and GPU backends, interop, a validation harness, and simulation workloads. The
+layers, their scope, and their status are described in [docs/ROADMAP.md](docs/ROADMAP.md); how
+correctness is established is described in [docs/VALIDATION.md](docs/VALIDATION.md). This
+document covers architecture and design decisions.
+
 ## Architecture
 
 ```
@@ -32,6 +38,34 @@ each other:
 1. **Naive Rust** — straightforward scalar loops, no optimization. The baseline.
 2. **SIMD Rust** — AVX2 intrinsics via `std::arch`, operating on multiple values per instruction.
 3. **NumPy** — the external reference point, run and timed in its native Python environment.
+
+## Layered design and backends
+
+The diagram above describes layer 1 (the core). The long-term structure is nine layers (see
+[docs/ROADMAP.md](docs/ROADMAP.md)), each building on the ones below it. Only layer 1 is under
+way; everything else in this section is **PLANNED** design intent, not implemented structure.
+
+**Backend abstraction.** Compute-heavy operations are meant to exist once per backend —
+scalar (the naive tier), SIMD (AVX2), and GPU (CUDA) — exposing the same operation set, with a
+future dispatch layer choosing among them (see Post-MVP roadmap for why operator traits and
+BLAS-style names belong to that layer rather than to any single tier). The GPU backend does not
+fit the CPU-tier mold, though: it works on separate device memory, so data must be transferred
+to and from the device, and whether the GPU wins depends on input size and on whether the data is
+already resident. A dispatcher therefore needs to account for data location and the CPU/GPU
+crossover point, not just feature detection as with CPU instruction sets. Because consumer GPUs
+throttle `f64` throughput heavily, the GPU work starts in `f32`.
+
+**Planned workspace structure.** Today the workspace has two crates (`celeris`,
+`celeris-analysis`). To keep the project from becoming one monolithic crate, the planned
+structure is roughly one crate per layer, so each layer can ship and be validated
+independently. Crate names are provisional and the table in [docs/ROADMAP.md](docs/ROADMAP.md)
+lists them. Layer 3 (Rayon) is likely a feature flag rather than a crate. Nothing has been
+restructured yet.
+
+**Open question.** The core's fixed-size, stack-allocated storage (see Design decisions) sits in
+tension with layers that need runtime sizes or heap storage (dense solvers at realistic sizes,
+GPU buffers, sparse formats, neural-network batches). This is undecided; see
+[docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Components
 
@@ -75,7 +109,9 @@ matrix), Euclidean (L2) and Manhattan (L1) norms (defined for any size `N`), and
 vector arithmetic — exact remaining scope still being finalized (see Design decisions). Cross
 product is a planned early post-MVP addition, not MVP (see Design decisions and roadmap).
 Implemented three times per the architecture above (naive, SIMD, and the NumPy reference script)
-— see File layout above for where each lives.
+— see File layout above for where each lives. Status: the naive tier is done and covered by
+golden-value tests; the SIMD tier is in progress; the NumPy reference scripts are not started
+(see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
 ### matrix
 
@@ -158,7 +194,8 @@ first, verified against hand-calculated truth rather than against each other —
 actually catches a bug shared across tiers, since oracle/differential testing alone only proves
 two tiers agree, not that either is correct. Oracle/differential testing (cross-tier agreement)
 comes next, once more than one tier exists. Benchmarking comes last, after correctness is
-established at every tier.
+established at every tier. See [docs/VALIDATION.md](docs/VALIDATION.md) for the full strategy,
+including the tolerance model and what exists versus what is planned.
 
 NumPy is invoked from the Rust test suite as a subprocess (`std::process::Command`), passing
 inputs as arguments and reading the result back from the script's output, rather than embedding
@@ -312,7 +349,9 @@ revisiting once real operation code exists.
   rather than deferred specifically because — unlike other MVP/post-MVP splits in this document —
   this is an organizational choice, not new capability: since both crates are being written for
   the first time regardless, setting up the workspace now costs little, while retrofitting it
-  after code already exists tangled together in one crate would mean real refactoring later.
+  after code already exists tangled together in one crate would mean real refactoring later. A
+  per-layer split of the workspace is planned beyond this two-crate starting point (see Layered
+  design and backends).
 
 - **Column-major matrix storage:** Neither row-major nor column-major is inherently faster —
   cache-friendliness depends on whether traversal order matches the storage layout, and this cuts
@@ -336,14 +375,18 @@ revisiting once real operation code exists.
   the last decade — unlike AVX-512, which has inconsistent support across chips.
 - **`f64` only for MVP:** `f64` is the more common default in general-purpose/scientific
   numerical computing (matches NumPy's own default dtype), and precision matters more than
-  raw throughput for this project's framing. `f32` is deferred to post-MVP.
+  raw throughput for this project's framing. `f32` is deferred past layer 1's first milestone, but
+  it is a prerequisite for the GPU backend (layer 4) and so moves ahead of the rest of the
+  post-MVP list.
 - **Fixed-size, stack-allocated vectors/matrices (const generics):** Vector and matrix sizes are
   fixed at compile time via Rust's const generics, backed by stack-allocated arrays rather than
   heap-allocated `Vec`. This avoids per-operation heap allocation/deallocation overhead and the
   pointer indirection of heap-backed storage. Trade-off: no support for runtime-determined
   (dynamically-sized) vectors or matrices. Stack space is finite and imposes a practical ceiling
   on supported sizes; the exact safe bound (accounting for multiple live operands per operation,
-  not just a single buffer in isolation) is not yet determined.
+  not just a single buffer in isolation) is not yet determined. The wider roadmap (dense solvers,
+  GPU buffers, sparse formats, neural-network batches) puts pressure on the no-runtime-sizes
+  non-goal; whether and how to extend it is an open question (see docs/ROADMAP.md).
 - **AVX2 hardcoded at compile time for MVP, no runtime detection:** MVP targets known hardware
   (the author's own machine, confirmed AVX2-capable), so CPU feature detection and multi-
   instruction-set dispatch would add complexity with no benefit yet. AVX2 is isolated behind the
@@ -393,7 +436,8 @@ revisiting once real operation code exists.
   official Rust style guide, so there's nothing to configure.
 - **Clippy:** the standard default lint groups (`correctness`/`style`/`complexity`/`perf`/
   `suspicious`) plus `clippy::pedantic` enabled, with all of it promoted from warnings to hard
-  errors (`-D warnings`, enforced in CI and locally) rather than left as non-blocking suggestions.
+  errors (`-D warnings`, enforced locally; no CI is set up yet — PLANNED) rather than left as
+  non-blocking suggestions.
   Deliberately stricter and noisier than a typical default setup — chosen specifically because
   rigorous enforcement serves this project's idiomatic-Rust learning goal better than lints that
   are easy to ignore, and matches CLAUDE.md's stated production-quality-practices goal.
@@ -412,15 +456,22 @@ revisiting once real operation code exists.
 ## Non-goals (for MVP)
 
 - Dynamically-sized (runtime-determined) vectors/matrices — sizes are fixed at compile time via
-  const generics
-- `f32` support (post-MVP)
-- GPU execution or CPU/GPU dispatch (post-MVP)
-- Multi-threading beyond SIMD (post-MVP)
-- Sparse matrix support
-- Higher-level operations (solving linear systems, eigenvalues, etc.)
-- Python bindings for the Rust core itself
+  const generics (an open question for the wider roadmap; see docs/ROADMAP.md)
+- `f32` support (post-MVP; needed first for the GPU backend, layer 4)
+- GPU execution or CPU/GPU dispatch (post-MVP; layer 4)
+- Multi-threading beyond SIMD (post-MVP; layer 3)
+- Sparse matrix support (post-MVP; layer 5)
+- Higher-level operations (solving linear systems, eigenvalues, etc.) (post-MVP; layer 2)
+- Python bindings for the Rust core itself (post-MVP; layer 7)
 
 ## Post-MVP roadmap
+
+The authoritative, status-tagged roadmap is [docs/ROADMAP.md](docs/ROADMAP.md). The items below
+predate it and carry technical notes that are not repeated there. Mapping to layers: runtime
+CPU feature detection and the dual-layout item belong to layer 1; CPU/GPU dispatch to layer 4;
+`f32` is a prerequisite of layer 4; multi-threading is layer 3; sparse is layer 5; higher-level
+linear algebra is layer 2; Python bindings are layer 7; benchmarking and analysis tooling are
+layers 1 and 8. Every item here is PLANNED unless the roadmap says otherwise.
 
 - **Cross product (3D vectors only)** — early-priority post-MVP addition, ahead of the rest of
   this list, needed for the planned physics simulation platform; deferred from MVP due to its
@@ -483,7 +534,9 @@ future, which is a separate, larger question from naming and not yet decided.
   `cust`, or direct FFI to CUDA C++ kernels), and how the existing CPU-dispatch-chain design
   generalizes (or doesn't) to a tier with real host/device memory transfer cost, unlike
   switching between CPU instruction sets.
-- **`f32` support** alongside `f64`, including benchmarking the precision/speed tradeoff between them.
+- **`f32` support** alongside `f64`, including benchmarking the precision/speed tradeoff between
+  them. Pulled forward as a prerequisite for the GPU backend (layer 4), since consumer GPUs
+  throttle `f64` throughput heavily (the ratio on the author's GPU is to verify).
 - **Multi-threading (Rayon)** layered on top of SIMD, parallelizing across cores in addition to
   within them.
 - **General, automated, statistically-matched analysis tool** (see Benchmark methodology) —

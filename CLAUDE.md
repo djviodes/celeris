@@ -39,6 +39,42 @@ and `git push` as a mechanical action. Regardless of who runs the git command:
   wrote (Claude may be attributed there). Do not combine them into a single commit that would
   misattribute authorship on either side.
 
+## Project context: the layered roadmap
+
+Celeris began as a small SIMD-accelerated linear algebra library and is now planned as nine
+layers: (1) core naive + AVX2 vector/matrix ops, (2) dense solvers, (3) CPU parallelism, (4) GPU
+backend, (5) sparse, (6) fusion and small JIT, (7) interop, (8) qualification harness, and
+(9) simulation workloads and a small neural network. `docs/ROADMAP.md` is the authoritative
+description of the layers, their dependencies, and their status. `DESIGN.md` holds architecture
+and design decisions, and `docs/VALIDATION.md` holds the validation strategy. Read those before
+reasoning about scope or ordering — and do not re-derive them from scratch.
+
+The working agreement above applies to every layer: Claude reviews and mentors, David writes all
+code. Layer 1 is the only layer under way.
+
+## Documentation rules
+
+- **Status-tag honesty.** Every roadmap item carries exactly one tag — DONE, IN PROGRESS, or
+  PLANNED — and the tag describes only what exists in the repository today. Check the repo
+  (`git log`, the test suite, the actual files) before assigning or changing a tag, rather than
+  trusting a verbal summary. Never claim benchmark results, speedups, or test coverage that do
+  not exist, and never put firm dates in the docs.
+- **Report discrepancies.** If the docs and the repo disagree, say so instead of silently picking
+  one.
+- **Public docs are technical only.** The repository is public. Committed files describe goals,
+  design, and validation in technical terms; they do not carry personal, biographical, or
+  motivational context.
+- **Decisions go in the docs.** A finalized decision is written into the repo docs promptly, not
+  left only in conversation.
+
+## Unverified tooling
+
+The GPU and interop layers (4, 6, 7) depend on tooling that has not been verified: whether to
+call CUDA C++ kernels through `cudarc` or direct FFI, whether NVRTC is usable from Rust, the
+`f64`-to-`f32` throughput ratio on the author's GPU, and the Python-bindings approach. Hosted CI
+runners also have no GPUs, so GPU tests run locally or on a self-hosted runner. Treat all of
+these as "to verify" until they have been checked, and do not state them as fact in the docs.
+
 ## Summary
 
 Claude teaches and reviews. David builds. Documentation is delegated to Claude by request. Git
